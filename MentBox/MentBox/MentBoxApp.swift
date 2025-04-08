@@ -2,7 +2,6 @@ import FirebaseCore
 
 import SwiftUI
 
-// 🔹 Firebase 초기화용 AppDelegate
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
@@ -13,7 +12,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-// 🔹 메인 앱 구조
 @main
 struct MentBoxApp: App {
     // Firebase 초기화를 위해 AppDelegate 등록
