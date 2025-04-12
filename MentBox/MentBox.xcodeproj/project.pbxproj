@@ -7,17 +7,52 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		235F32CD2DAAB13700373363 /* Pretendard-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */; };
+		235F32CE2DAAB13700373363 /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */; };
+		235F32CF2DAAB13700373363 /* Pretendard-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C92DAAB13700373363 /* Pretendard-Medium.otf */; };
+		235F32D02DAAB13700373363 /* Pretendard-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */; };
+		235F32D12DAAB13700373363 /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C52DAAB13700373363 /* Pretendard-Bold.otf */; };
+		235F32D22DAAB13700373363 /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C82DAAB13700373363 /* Pretendard-Light.otf */; };
+		235F32D32DAAB13700373363 /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */; };
+		235F32D42DAAB13700373363 /* Pretendard-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C42DAAB13700373363 /* Pretendard-Black.otf */; };
+		235F32D52DAAB13700373363 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */; };
+		235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32D82DAAB23800373363 /* PretendardVariable.ttf */; };
+		235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */; };
 		23F5A3C42DA3FC4B000149D6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */; };
 		23F5A3C62DA3FC4B000149D6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 23F5A3C52DA3FC4B000149D6 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		235F32C42DAAB13700373363 /* Pretendard-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Black.otf"; sourceTree = "<group>"; };
+		235F32C52DAAB13700373363 /* Pretendard-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Bold.otf"; sourceTree = "<group>"; };
+		235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
+		235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraLight.otf"; sourceTree = "<group>"; };
+		235F32C82DAAB13700373363 /* Pretendard-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Light.otf"; sourceTree = "<group>"; };
+		235F32C92DAAB13700373363 /* Pretendard-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Medium.otf"; sourceTree = "<group>"; };
+		235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
+		235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-SemiBold.otf"; sourceTree = "<group>"; };
+		235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Thin.otf"; sourceTree = "<group>"; };
+		235F32D82DAAB23800373363 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
+		235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Geologica_Auto-Bold.ttf"; sourceTree = "<group>"; };
 		23F5A3AF2DA3F906000149D6 /* MentBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MentBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		235F32D72DAAB18C00373363 /* Exceptions for "MentBox" folder in "MentBox" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 23F5A3AE2DA3F906000149D6 /* MentBox */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23F5A3B12DA3F906000149D6 /* MentBox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				235F32D72DAAB18C00373363 /* Exceptions for "MentBox" folder in "MentBox" target */,
+			);
 			path = MentBox;
 			sourceTree = "<group>";
 		};
@@ -36,9 +71,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		235F32C32DAAB12500373363 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */,
+				235F32C42DAAB13700373363 /* Pretendard-Black.otf */,
+				235F32C52DAAB13700373363 /* Pretendard-Bold.otf */,
+				235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */,
+				235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */,
+				235F32C82DAAB13700373363 /* Pretendard-Light.otf */,
+				235F32C92DAAB13700373363 /* Pretendard-Medium.otf */,
+				235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */,
+				235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */,
+				235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */,
+				235F32D82DAAB23800373363 /* PretendardVariable.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		23F5A3A62DA3F906000149D6 = {
 			isa = PBXGroup;
 			children = (
+				235F32C32DAAB12500373363 /* Fonts */,
 				23F5A3B12DA3F906000149D6 /* MentBox */,
 				23F5A3B02DA3F906000149D6 /* Products */,
 			);
@@ -121,6 +175,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */,
+				235F32CD2DAAB13700373363 /* Pretendard-ExtraBold.otf in Resources */,
+				235F32CE2DAAB13700373363 /* Pretendard-ExtraLight.otf in Resources */,
+				235F32CF2DAAB13700373363 /* Pretendard-Medium.otf in Resources */,
+				235F32D02DAAB13700373363 /* Pretendard-Thin.otf in Resources */,
+				235F32D12DAAB13700373363 /* Pretendard-Bold.otf in Resources */,
+				235F32D22DAAB13700373363 /* Pretendard-Light.otf in Resources */,
+				235F32D32DAAB13700373363 /* Pretendard-Regular.otf in Resources */,
+				235F32D42DAAB13700373363 /* Pretendard-Black.otf in Resources */,
+				235F32D52DAAB13700373363 /* Pretendard-SemiBold.otf in Resources */,
+				235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +332,7 @@
 				DEVELOPMENT_TEAM = 9A96KXU385;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MentBox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -279,6 +345,9 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = bishoe01.MentBox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -296,6 +365,7 @@
 				DEVELOPMENT_TEAM = 9A96KXU385;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MentBox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -308,6 +378,9 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = bishoe01.MentBox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
