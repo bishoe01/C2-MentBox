@@ -7,15 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		235F32CD2DAAB13700373363 /* Pretendard-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */; };
-		235F32CE2DAAB13700373363 /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */; };
-		235F32CF2DAAB13700373363 /* Pretendard-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C92DAAB13700373363 /* Pretendard-Medium.otf */; };
-		235F32D02DAAB13700373363 /* Pretendard-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */; };
-		235F32D12DAAB13700373363 /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C52DAAB13700373363 /* Pretendard-Bold.otf */; };
-		235F32D22DAAB13700373363 /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C82DAAB13700373363 /* Pretendard-Light.otf */; };
-		235F32D32DAAB13700373363 /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */; };
-		235F32D42DAAB13700373363 /* Pretendard-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32C42DAAB13700373363 /* Pretendard-Black.otf */; };
-		235F32D52DAAB13700373363 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */; };
 		235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32D82DAAB23800373363 /* PretendardVariable.ttf */; };
 		235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */; };
 		23F5A3C42DA3FC4B000149D6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */; };
@@ -23,15 +14,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		235F32C42DAAB13700373363 /* Pretendard-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Black.otf"; sourceTree = "<group>"; };
-		235F32C52DAAB13700373363 /* Pretendard-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Bold.otf"; sourceTree = "<group>"; };
-		235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
-		235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraLight.otf"; sourceTree = "<group>"; };
-		235F32C82DAAB13700373363 /* Pretendard-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Light.otf"; sourceTree = "<group>"; };
-		235F32C92DAAB13700373363 /* Pretendard-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Medium.otf"; sourceTree = "<group>"; };
-		235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
-		235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-SemiBold.otf"; sourceTree = "<group>"; };
-		235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Thin.otf"; sourceTree = "<group>"; };
 		235F32D82DAAB23800373363 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
 		235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Geologica_Auto-Bold.ttf"; sourceTree = "<group>"; };
 		23F5A3AF2DA3F906000149D6 /* MentBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MentBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +38,11 @@
 			path = MentBox;
 			sourceTree = "<group>";
 		};
+		23FC06AE2DABFB1800FF995D /* Core */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Core;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,15 +62,6 @@
 			isa = PBXGroup;
 			children = (
 				235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */,
-				235F32C42DAAB13700373363 /* Pretendard-Black.otf */,
-				235F32C52DAAB13700373363 /* Pretendard-Bold.otf */,
-				235F32C62DAAB13700373363 /* Pretendard-ExtraBold.otf */,
-				235F32C72DAAB13700373363 /* Pretendard-ExtraLight.otf */,
-				235F32C82DAAB13700373363 /* Pretendard-Light.otf */,
-				235F32C92DAAB13700373363 /* Pretendard-Medium.otf */,
-				235F32CA2DAAB13700373363 /* Pretendard-Regular.otf */,
-				235F32CB2DAAB13700373363 /* Pretendard-SemiBold.otf */,
-				235F32CC2DAAB13700373363 /* Pretendard-Thin.otf */,
 				235F32D82DAAB23800373363 /* PretendardVariable.ttf */,
 			);
 			path = Fonts;
@@ -92,6 +70,7 @@
 		23F5A3A62DA3F906000149D6 = {
 			isa = PBXGroup;
 			children = (
+				23FC06AE2DABFB1800FF995D /* Core */,
 				235F32C32DAAB12500373363 /* Fonts */,
 				23F5A3B12DA3F906000149D6 /* MentBox */,
 				23F5A3B02DA3F906000149D6 /* Products */,
@@ -123,6 +102,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				23F5A3B12DA3F906000149D6 /* MentBox */,
+				23FC06AE2DABFB1800FF995D /* Core */,
 			);
 			name = MentBox;
 			packageProductDependencies = (
@@ -176,15 +156,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */,
-				235F32CD2DAAB13700373363 /* Pretendard-ExtraBold.otf in Resources */,
-				235F32CE2DAAB13700373363 /* Pretendard-ExtraLight.otf in Resources */,
-				235F32CF2DAAB13700373363 /* Pretendard-Medium.otf in Resources */,
-				235F32D02DAAB13700373363 /* Pretendard-Thin.otf in Resources */,
-				235F32D12DAAB13700373363 /* Pretendard-Bold.otf in Resources */,
-				235F32D22DAAB13700373363 /* Pretendard-Light.otf in Resources */,
-				235F32D32DAAB13700373363 /* Pretendard-Regular.otf in Resources */,
-				235F32D42DAAB13700373363 /* Pretendard-Black.otf in Resources */,
-				235F32D52DAAB13700373363 /* Pretendard-SemiBold.otf in Resources */,
 				235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
