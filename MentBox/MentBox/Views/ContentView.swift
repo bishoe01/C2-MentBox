@@ -3,23 +3,38 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         TabView {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("홈")
-                }
+            ZStack {
+                Image("BG")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                HomeView()
+            }
+            .tabItem {
+                Image(systemName: "house.fill")
+                Text("홈")
+            }
 
-            SavedView()
-                .tabItem {
-                    Image(systemName: "person.fill")
-                    Text("프로필")
-                }
+            ZStack {
+                Image("BG")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                SavedView()
+            }
+            .tabItem {
+                Image(systemName: "person.fill")
+                Text("프로필")
+            }
 
-            MyLetterView()
-                .tabItem {
-                    Image(systemName: "gear")
-                    Text("설정")
-                }
+            ZStack {
+                Image("BG")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                MyLetterView()
+            }
+            .tabItem {
+                Image(systemName: "gear")
+                Text("설정")
+            }
         }
         .tint(.white)
         .preferredColorScheme(.dark)
