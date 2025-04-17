@@ -5,6 +5,13 @@ enum MessageType {
     case answer
 }
 
+enum MentorCategory: String, CaseIterable {
+    case all = "All"
+    case tech = "Tech"
+    case design = "Design"
+    case business = "Business"
+}
+
 struct ChatBox: Identifiable {
     let id: UUID = .init()
     let messageType: MessageType

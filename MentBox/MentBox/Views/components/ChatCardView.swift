@@ -3,60 +3,128 @@ import SwiftUI
 struct ChatCardView: View {
     let question: ChatBox
     let answer: ChatBox
+    @State private var isPressed = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // 질문 부분
-            VStack(alignment: .leading, spacing: 8) {
-                Text(question.content)
-                    .font(.body)
-                    .foregroundColor(.white)
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation {
+                    isPressed = false
+                }
+            }
+            // 채팅 상세보기 액션
+        }) {
+            VStack(alignment: .leading, spacing: 0) {
+                // 질문 부분
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Q.")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.yellow)
+                        
+                        Text(question.content)
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: UIColor(red: 0.2, green: 0.2, blue: 0.25, alpha: 1.0)))
-            
-            Divider()
-                .background(Color.gray.opacity(0.3))
-            
-            // 답변 부분
-            VStack(alignment: .leading, spacing: 16) {
-                // 멘토 프로필 영역
-                HStack(spacing: 12) {
-                    // 프로필 이미지
-                    AsyncImage(url: URL(string: answer.recipient.profileImage)) { image in
-                        image
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color("btn_dark").opacity(0.3),
+                            Color("btn_light").opacity(0.3)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                
+                // 답변 부분
+                VStack(alignment: .leading, spacing: 16) {
+                    // 멘토 프로필 영역
+                    HStack(spacing: 12) {
+                        // 프로필 이미지
+                        Image(answer.recipient.profileImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle()
-                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            // 멘토 이름
+                            Text(answer.recipient.name)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                            
+                            Text(answer.recipient.expertise)
+                                .font(.system(size: 12))
+                                .foregroundColor(.yellow)
+                        }
+                        
+                        Spacer()
+                        
+                        // 북마크 수 표시
+                        if answer.bookmarkCount > 0 {
+                            HStack(spacing: 4) {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.system(size: 12))
+                                Text("\(answer.bookmarkCount)")
+                                    .font(.system(size: 12))
+                            }
+                            .foregroundColor(.yellow.opacity(0.8))
+                        }
                     }
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    
-                    // 멘토 이름
-                    Text(answer.recipient.name)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                
-                // 답변 내용
-                Text(answer.content)
-                    .font(.body)
-                    .foregroundColor(.white)
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 12)
+                    
+                    // 답변 내용
+                    Text(answer.content)
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineSpacing(4)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color("btn_dark").opacity(0.95),
+                            Color("btn_light").opacity(0.95)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
             }
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color("lightGray").opacity(0.6),
+                                Color("lightGray").opacity(0.3)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
         }
-        .background(Color(uiColor: UIColor(red: 0.15, green: 0.15, blue: 0.2, alpha: 1.0)))
-        .cornerRadius(12)
-        .shadow(radius: 5)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -64,33 +132,35 @@ struct ChatCardView: View {
     let previewMentor = Mentor(
         name: "데이지",
         bio: "UX 디자이너",
-        profileImage: "https://example.com/profile.jpg",
+        profileImage: "Daisy",
         expertise: "디자인"
     )
     
     let previewQuestion = ChatBox(
         messageType: .question,
         senderName: "사용자",
-        content: "다시는 잃을은 때 쓸빛이네 푸른 아무것도 회한도 푸른 파란 시간에 잊지 때 생각이다.",
+        content: "UX 디자인을 시작하려고 하는데, 어떤 것부터 시작하면 좋을까요?",
         sentDate: Date(),
         isFromMe: true,
         recipient: previewMentor,
         isBookmarked: false,
-        bookmarkCount: 0
+        bookmarkCount: 5
     )
     
     let previewAnswer = ChatBox(
         messageType: .answer,
         senderName: "데이지",
-        content: "답변 내용입니다.",
+        content: "UX 디자인을 시작하시는 거라면, 먼저 사용자 리서치와 기본적인 디자인 원칙을 이해하는 것이 중요해요. 실제 사례를 분석하고 작은 프로젝트부터 시작해보는 것을 추천드립니다.",
         sentDate: Date(),
         isFromMe: false,
         recipient: previewMentor,
-        isBookmarked: false,
-        bookmarkCount: 0
+        isBookmarked: true,
+        bookmarkCount: 5
     )
     
-    return ChatCardView(question: previewQuestion, answer: previewAnswer)
-        .padding()
-        .background(Color.black)
-} 
+    return ZStack {
+        Color.black.edgesIgnoringSafeArea(.all)
+        ChatCardView(question: previewQuestion, answer: previewAnswer)
+            .padding()
+    }
+}
