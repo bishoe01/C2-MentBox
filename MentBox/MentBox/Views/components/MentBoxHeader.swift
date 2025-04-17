@@ -5,14 +5,11 @@ struct MentBoxHeader: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "chevron.left")
-                .foregroundColor(.white)
-            Spacer()
             Text(title)
-                .font(.title2.bold())
-                .foregroundColor(.white)
+                .font(.title.bold())
+                .foregroundColor(Color("Primary"))
+
             Spacer()
-            Spacer() // 좌우 정렬 맞추기용
         }
         .padding()
     }

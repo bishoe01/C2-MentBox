@@ -25,7 +25,6 @@ struct Mentor: Identifiable {
     let expertise: String // 디자인 ,테크 , 도메인 같은 분야 ?
 }
 
-// 멘토 인스턴스 생성
 let mentor = Mentor(
     name: "김멘토",
     bio: "10년차 iOS 개발자",

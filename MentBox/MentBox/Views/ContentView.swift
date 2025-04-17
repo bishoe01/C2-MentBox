@@ -7,7 +7,10 @@ struct ContentView: View {
                 Image("BG")
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
-                HomeView()
+                VStack {
+                    MentBoxHeader(title: "MENTBOX")
+                    HomeView()
+                }
             }
             .tabItem {
                 Image(systemName: "house.fill")

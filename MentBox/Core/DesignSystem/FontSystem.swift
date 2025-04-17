@@ -12,7 +12,7 @@ enum MenterFontStyle {
     var font: Font {
         switch self {
         case .header:
-            return .custom("Geologica-Bold", size: 24)
+            return .custom("PretendardVariable-Bold", size: 24)
         case .subtitle:
             return .custom("PretendardVariable-SemiBold", size: 20)
         case .body:
@@ -67,7 +67,6 @@ extension Font.Weight {
     }
 }
 
-// View Modifier 간편 사용법
 extension View {
     func menterFont(_ style: MenterFontStyle) -> some View {
         self.font(style.font)

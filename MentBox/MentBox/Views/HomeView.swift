@@ -3,7 +3,15 @@ import SwiftUI
 struct HomeView: View {
     var body: some View {
         // 스크롤 뷰
+
         VStack {
+            HStack {
+                Text("공감 받은 사연")
+                    .menterFont(.header)
+
+                Spacer()
+            }
+
             ScrollView {
                 VStack(spacing: 20) {
                     // 첫 번째 ChatCardView
@@ -39,7 +47,6 @@ struct HomeView: View {
                             bookmarkCount: 0
                         )
                     )
-                    .padding(.horizontal)
 
                     // 두 번째 ChatCardView
                     ChatCardView(
@@ -74,18 +81,22 @@ struct HomeView: View {
                             bookmarkCount: 0
                         )
                     )
-                    .padding(.horizontal)
                 }
-                .padding(.vertical)
+                .padding(.vertical) // FIXME: 패딩 수정필요
                 .frame(maxWidth: .infinity)
             }
             .edgesIgnoringSafeArea(.all)
-        }
+        }.padding(.horizontal, 20)
     }
 }
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
+        ZStack {
+            Image("BG")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+            HomeView()
+        }
     }
 }
