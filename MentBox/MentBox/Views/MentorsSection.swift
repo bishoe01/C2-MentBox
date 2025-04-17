@@ -46,11 +46,7 @@ struct CategoryButtonStyle: ViewModifier {
 struct MentorsSection: View {
     @State private var selectedCategory: MentorCategory = .all
     
-    let mentors = [
-        Mentor(name: "Gommin", bio: "Senior iOS Developer", profileImage: "Gommin", expertise: "Tech"),
-        Mentor(name: "Daisy", bio: "UX/UI Designer", profileImage: "Daisy", expertise: "Design"),
-        Mentor(name: "Lumi", bio: "Business Consultant", profileImage: "Lumi", expertise: "Business")
-    ]
+    let mentors = MockMentorData.mentors
     
     var filteredMentors: [Mentor] {
         if selectedCategory == .all {
