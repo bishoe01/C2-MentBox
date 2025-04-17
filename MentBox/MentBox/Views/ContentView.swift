@@ -7,40 +7,54 @@ struct ContentView: View {
                 Image("BG")
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
-                VStack {
+                VStack(spacing: 0) {
                     MentBoxHeader(title: "MENTBOX")
                     HomeView()
+                        .padding(.bottom, 20)
                 }
             }
             .tabItem {
                 Image(systemName: "house.fill")
-                Text("홈")
             }
 
             ZStack {
                 Image("BG")
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
-                SavedView()
+                VStack(spacing: 0) {
+                    MentBoxHeader(title: "프로필")
+                    SavedView()
+                        .padding(.bottom, 20)
+                }
             }
             .tabItem {
                 Image(systemName: "person.fill")
-                Text("프로필")
             }
 
             ZStack {
                 Image("BG")
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
-                MyLetterView()
+                VStack(spacing: 0) {
+                    MentBoxHeader(title: "설정")
+                    MyLetterView()
+                        .padding(.bottom, 20)
+                }
             }
             .tabItem {
                 Image(systemName: "gear")
-                Text("설정")
             }
         }
         .tint(.white)
         .preferredColorScheme(.dark)
+        .overlay(
+            Rectangle()
+                .frame(height: 2)
+                .foregroundColor(Color("Primary"))
+                .clipShape(Capsule())
+                .offset(y: -70),
+            alignment: .bottom
+        )
     }
 }
 
