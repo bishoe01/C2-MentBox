@@ -22,13 +22,13 @@ struct ContentView: View {
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
                 VStack(spacing: 0) {
-                    MentBoxHeader(title: "프로필")
+                    MentBoxHeader(title: "STARS")
                     SavedView()
                         .padding(.bottom, 20)
                 }
             }
             .tabItem {
-                Image(systemName: "person.fill")
+                Image(systemName: "star.fill")
             }
 
             ZStack {
@@ -36,13 +36,13 @@ struct ContentView: View {
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
                 VStack(spacing: 0) {
-                    MentBoxHeader(title: "설정")
+                    MentBoxHeader(title: "MYLETTER")
                     MyLetterView()
                         .padding(.bottom, 20)
                 }
             }
             .tabItem {
-                Image(systemName: "gear")
+                Image(systemName: "envelope.fill")
             }
         }
         .tint(.white)

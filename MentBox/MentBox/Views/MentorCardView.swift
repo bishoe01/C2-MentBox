@@ -18,10 +18,10 @@ struct MentorCardView: View {
                     isPressed = false
                 }
             }
-            // 채팅 시작 액션
+            
         }) {
             VStack(alignment: .leading, spacing: 16) {
-                // 프로필 이미지와 이모지
+                // 프로필이랑 카테고리 이모지 넣는 VSTACK 
                 HStack(alignment: .top) {
                     Image(profileImageName)
                         .resizable()
@@ -35,7 +35,7 @@ struct MentorCardView: View {
                     
                     Spacer()
                     
-                    // 분야별 이모지
+                    // 카테고리별 이모지 -> 아마 라벨같은거로 바뀌어도 괜찮을수도 ? 
                     Text(mentor.expertise == "Tech" ? "👨‍💻" :
                          mentor.expertise == "Design" ? "🎨" : "💼")
                         .font(.system(size: 24))

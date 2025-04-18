@@ -6,6 +6,7 @@ struct ChatCardView: View {
     @State private var isPressed = false
     
     var body: some View {
+        // 버튼을 버튼답게하는 간단한 애니메이션인데, 이거보다 그냥 테두리에 장난치는게 더 나을듯 ? -> 아마 Primary컬러로 blur주던지 그건 추후 
         Button(action: {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 isPressed = true
@@ -15,10 +16,9 @@ struct ChatCardView: View {
                     isPressed = false
                 }
             }
-            // 채팅 상세보기 액션
         }) {
             VStack(alignment: .leading, spacing: 0) {
-                // 질문 부분
+                
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Q.")
@@ -45,11 +45,11 @@ struct ChatCardView: View {
                     )
                 )
                 
-                // 답변 부분
+                // 멘토 답변이 담길 부분인데, 따로 분리해줄필요 있나 ? 
                 VStack(alignment: .leading, spacing: 16) {
-                    // 멘토 프로필 영역
+                    
                     HStack(spacing: 12) {
-                        // 프로필 이미지
+                        
                         Image(answer.recipient.profileImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
@@ -60,8 +60,8 @@ struct ChatCardView: View {
                                     .stroke(Color.white.opacity(0.2), lineWidth: 1)
                             )
                         
+                        // name 
                         VStack(alignment: .leading, spacing: 2) {
-                            // 멘토 이름
                             Text(answer.recipient.name)
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
@@ -73,7 +73,7 @@ struct ChatCardView: View {
                         
                         Spacer()
                         
-                        // 북마크 수 표시
+                        
                         if answer.bookmarkCount > 0 {
                             HStack(spacing: 4) {
                                 Image(systemName: "bookmark.fill")
@@ -87,7 +87,7 @@ struct ChatCardView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                     
-                    // 답변 내용
+                    
                     Text(answer.content)
                         .font(.system(size: 15))
                         .foregroundColor(.white.opacity(0.9))
