@@ -5,9 +5,15 @@ class FirebaseService {
     static let shared = FirebaseService()
     private let db = Firestore.firestore()
     private let defaults = UserDefaults.standard
-    private let mockDataUploadedKey = "mockDataUploaded"
+    private let mockDataUploadedKey = "mockDataUploadedKey"
     
     private init() {}
+    
+    // UserDefaults 초기화 메서드 추가
+    func resetMockDataUploaded() {
+        defaults.removeObject(forKey: mockDataUploadedKey)
+        print("✅ mockDataUploadedKey 초기화 완료")
+    }
     
     func uploadMockData() {
         // 이미 업로드된 경우 중복 업로드 방지
@@ -216,20 +222,81 @@ class FirebaseService {
         var allPairs: [(question: ChatBox, answer: ChatBox)] = []
         let group = DispatchGroup()
         
-        // 모든 멘토 가져오기
-        self.fetchMentors { mentors in
-            for mentor in mentors {
-                group.enter()
-                self.fetchQuestionAnswerPairs(for: mentor.id) { pairs in
-                    allPairs.append(contentsOf: pairs)
-                    group.leave()
+        // 모든 답변 가져오기
+        self.db.collection("answers")
+            .order(by: "sentDate", descending: true)
+            .getDocuments { answerSnapshot, error in
+                if let error = error {
+                    print("❌ 답변 데이터 가져오기 실패: \(error)")
+                    completion([])
+                    return
+                }
+                
+                guard let answers = answerSnapshot?.documents else {
+                    completion([])
+                    return
+                }
+                
+                for answerDoc in answers {
+                    let answerData = answerDoc.data()
+                    guard let questionId = answerData["questionId"] as? String,
+                          let senderName = answerData["senderName"] as? String,
+                          let content = answerData["content"] as? String,
+                          let sentDate = (answerData["sentDate"] as? Timestamp)?.dateValue(),
+                          let mentorId = answerData["mentorId"] as? String,
+                          let isBookmarked = answerData["isBookmarked"] as? Bool,
+                          let bookmarkCount = answerData["bookmarkCount"] as? Int
+                    else { continue }
+                    
+                    group.enter()
+                    // 해당 답변의 질문 가져오기
+                    self.db.collection("questions").document(questionId).getDocument { questionDoc, error in
+                        if let questionData = questionDoc?.data(),
+                           let senderName = questionData["senderName"] as? String,
+                           let content = questionData["content"] as? String,
+                           let sentDate = (questionData["sentDate"] as? Timestamp)?.dateValue(),
+                           let isBookmarked = questionData["isBookmarked"] as? Bool,
+                           let bookmarkCount = questionData["bookmarkCount"] as? Int,
+                           let status = questionData["status"] as? String
+                        {
+                            let question = ChatBox(
+                                id: questionId,
+                                messageType: .question,
+                                senderName: senderName,
+                                content: content,
+                                sentDate: sentDate,
+                                isFromMe: true,
+                                mentorId: mentorId,
+                                isBookmarked: isBookmarked,
+                                bookmarkCount: bookmarkCount,
+                                questionId: nil,
+                                status: status
+                            )
+                            
+                            let answer = ChatBox(
+                                id: answerDoc.documentID,
+                                messageType: .answer,
+                                senderName: answerData["senderName"] as! String,
+                                content: answerData["content"] as! String,
+                                sentDate: sentDate,
+                                isFromMe: false,
+                                mentorId: mentorId,
+                                isBookmarked: isBookmarked,
+                                bookmarkCount: bookmarkCount,
+                                questionId: questionId,
+                                status: nil
+                            )
+                            
+                            allPairs.append((question: question, answer: answer))
+                        }
+                        group.leave()
+                    }
+                }
+                
+                group.notify(queue: .main) {
+                    // 북마크 수가 많은 순으로 정렬
+                    completion(allPairs.sorted { $0.answer.bookmarkCount > $1.answer.bookmarkCount })
                 }
             }
-            
-            group.notify(queue: .main) {
-                // 북마크 수가 많은 순으로 정렬
-                completion(allPairs.sorted { $0.answer.bookmarkCount > $1.answer.bookmarkCount })
-            }
-        }
     }
 }

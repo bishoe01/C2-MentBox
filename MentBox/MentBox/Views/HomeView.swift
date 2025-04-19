@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
+    @State private var isLoading = true
     
     var body: some View {
         NavigationView {
@@ -11,30 +12,49 @@ struct HomeView: View {
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
 
-                ScrollView {
-                    VStack(spacing: 30) {
-                        VStack(spacing: 5) {
-                            MentBoxHeader(title: "MENTBOX", isPadding: false)
-                            MentorsSection(mentors: mentors)
-                        }
-
-                        VStack {
-                            HStack {
-                                Text("공감 받은 사연")
-                                    .menterFont(.header)
-                                Spacer()
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 30) {
+                            VStack(spacing: 5) {
+                                MentBoxHeader(title: "MENTBOX", isPadding: false)
+                                MentorsSection(mentors: mentors)
                             }
 
-                            VStack(spacing: 20) {
-                                ForEach(chatPairs.indices, id: \.self) { index in
-                                    let pair = chatPairs[index]
-                                    ChatCardView(question: pair.question, answer: pair.answer)
+                            VStack {
+                                HStack {
+                                    Text("공감 받은 사연")
+                                        .menterFont(.header)
+                                    Spacer()
+                                }
+
+                                if chatPairs.isEmpty {
+                                    VStack(spacing: 16) {
+                                        Image(systemName: "doc.text")
+                                            .font(.system(size: 40))
+                                            .foregroundColor(.white.opacity(0.5))
+                                        Text("아직 답변된 사연이 없습니다")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.white.opacity(0.7))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 40)
+                                } else {
+                                    VStack(spacing: 20) {
+                                        ForEach(chatPairs.indices, id: \.self) { index in
+                                            let pair = chatPairs[index]
+                                            ChatCardView(question: pair.question, answer: pair.answer)
+                                        }
+                                    }
+                                    .padding(.vertical)
                                 }
                             }
-                            .padding(.vertical)
                         }
+                        .padding(.horizontal, 16)
                     }
-                    .padding(.horizontal, 16)
                 }
             }
             .navigationBarTitle("MENTBOX", displayMode: .inline)
@@ -46,6 +66,7 @@ struct HomeView: View {
     }
     
     private func loadData() {
+        isLoading = true
         let group = DispatchGroup()
         
         group.enter()
@@ -58,6 +79,10 @@ struct HomeView: View {
         FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
             self.chatPairs = pairs
             group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            isLoading = false
         }
     }
 }

@@ -1,5 +1,4 @@
 import FirebaseCore
-
 import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -14,7 +13,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct MentBoxApp: App {
-    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
