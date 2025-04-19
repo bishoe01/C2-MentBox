@@ -8,7 +8,6 @@ struct ContentView: View {
                     .resizable()
                     .edgesIgnoringSafeArea(.all)
                 VStack(spacing: 0) {
-                    MentBoxHeader(title: "MENTBOX")
                     HomeView()
                         .padding(.bottom, 20)
                 }

@@ -22,6 +22,7 @@ struct ChatBox: Identifiable {
     let recipient: Mentor // 어떤 멘토한테 보낼것인지
     let isBookmarked: Bool // 내가 저장한 것인지
     let bookmarkCount: Int // 저장한 사람의 수
+    let mentorId: UUID // 멘토 ID
 }
 
 struct Mentor: Identifiable {
@@ -48,7 +49,8 @@ let question = ChatBox(
     isFromMe: true,
     recipient: mentor,
     isBookmarked: false,
-    bookmarkCount: 0
+    bookmarkCount: 0,
+    mentorId: mentor.id
 )
 
 // 답변 메시지
@@ -60,5 +62,6 @@ let answer = ChatBox(
     isFromMe: false,
     recipient: mentor,
     isBookmarked: false,
-    bookmarkCount: 0
+    bookmarkCount: 0,
+    mentorId: mentor.id
 )

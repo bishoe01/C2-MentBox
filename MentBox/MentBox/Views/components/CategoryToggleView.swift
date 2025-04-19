@@ -29,8 +29,7 @@ struct CategoryToggleView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
                 Text(title)
-                    .font(.title)
-                    .bold()
+                    .menterFont(.header)
                     .foregroundColor(.white)
                 
                 Spacer()
