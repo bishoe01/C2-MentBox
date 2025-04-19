@@ -9,15 +9,16 @@ class FirebaseService {
     
     private init() {}
     
-    // UserDefaults 초기화 메서드 추가
+    // MARK: UserDefaults 초기화 메서드 추가
+
     func resetMockDataUploaded() {
-        defaults.removeObject(forKey: mockDataUploadedKey)
+        self.defaults.removeObject(forKey: self.mockDataUploadedKey)
         print("✅ mockDataUploadedKey 초기화 완료")
     }
     
     func uploadMockData() {
         // 이미 업로드된 경우 중복 업로드 방지
-        if defaults.bool(forKey: mockDataUploadedKey) {
+        if self.defaults.bool(forKey: self.mockDataUploadedKey) {
             print("✅ 더미 데이터가 이미 업로드되어 있습니다.")
             return
         }
@@ -42,7 +43,6 @@ class FirebaseService {
         
         // 질문과 답변 데이터 업로드
         for pair in MockChatBoxData.chatPairs {
-            // 질문 업로드
             let questionData: [String: Any] = [
                 "senderName": pair.question.senderName,
                 "content": pair.question.content,
@@ -81,7 +81,7 @@ class FirebaseService {
             }
         }
         
-        self.defaults.set(true, forKey: mockDataUploadedKey)
+        self.defaults.set(true, forKey: self.mockDataUploadedKey)
         print("✅ 모든 더미 데이터 업로드 완료")
     }
     
@@ -126,6 +126,7 @@ class FirebaseService {
                   let mentorProfileImage = mentorData["profileImage"] as? String,
                   let mentorExpertise = mentorData["expertise"] as? String
             else {
+                print("❌ 멘토 데이터 가져오기 실패")
                 completion([])
                 return
             }
@@ -161,7 +162,10 @@ class FirebaseService {
                               let isBookmarked = questionData["isBookmarked"] as? Bool,
                               let bookmarkCount = questionData["bookmarkCount"] as? Int,
                               let status = questionData["status"] as? String
-                        else { continue }
+                        else {
+                            print("⚠️ 질문 데이터 형식이 올바르지 않습니다. questionId: \(questionDoc.documentID)")
+                            continue
+                        }
                         
                         let question = ChatBox(
                             id: questionDoc.documentID,
@@ -182,31 +186,42 @@ class FirebaseService {
                         self.db.collection("answers")
                             .whereField("questionId", isEqualTo: questionDoc.documentID)
                             .getDocuments { answerSnapshot, error in
-                                if let answerDoc = answerSnapshot?.documents.first {
-                                    let answerData = answerDoc.data()
-                                    if let senderName = answerData["senderName"] as? String,
-                                       let content = answerData["content"] as? String,
-                                       let sentDate = (answerData["sentDate"] as? Timestamp)?.dateValue(),
-                                       let isBookmarked = answerData["isBookmarked"] as? Bool,
-                                       let bookmarkCount = answerData["bookmarkCount"] as? Int
-                                    {
-                                        let answer = ChatBox(
-                                            id: answerDoc.documentID,
-                                            messageType: .answer,
-                                            senderName: senderName,
-                                            content: content,
-                                            sentDate: sentDate,
-                                            isFromMe: false,
-                                            mentorId: mentorId,
-                                            isBookmarked: isBookmarked,
-                                            bookmarkCount: bookmarkCount,
-                                            questionId: questionDoc.documentID,
-                                            status: nil
-                                        )
-                                        pairs.append((question: question, answer: answer))
-                                    }
+                                defer { group.leave() }
+                                
+                                if let error = error {
+                                    print("❌ 답변 데이터 가져오기 실패: \(error)")
+                                    return
                                 }
-                                group.leave()
+                                
+                                guard let answerDoc = answerSnapshot?.documents.first else {
+                                    print("⚠️ 답변 없음 - questionId: \(questionDoc.documentID)")
+                                    return
+                                }
+                                
+                                let answerData = answerDoc.data()
+                                if let senderName = answerData["senderName"] as? String,
+                                   let content = answerData["content"] as? String,
+                                   let sentDate = (answerData["sentDate"] as? Timestamp)?.dateValue(),
+                                   let isBookmarked = answerData["isBookmarked"] as? Bool,
+                                   let bookmarkCount = answerData["bookmarkCount"] as? Int
+                                {
+                                    let answer = ChatBox(
+                                        id: answerDoc.documentID,
+                                        messageType: .answer,
+                                        senderName: senderName,
+                                        content: content,
+                                        sentDate: sentDate,
+                                        isFromMe: false,
+                                        mentorId: mentorId,
+                                        isBookmarked: isBookmarked,
+                                        bookmarkCount: bookmarkCount,
+                                        questionId: questionDoc.documentID,
+                                        status: nil
+                                    )
+                                    pairs.append((question: question, answer: answer))
+                                } else {
+                                    print("⚠️ 답변 데이터 형식이 올바르지 않습니다. answerId: \(answerDoc.documentID)")
+                                }
                             }
                     }
                     
@@ -251,44 +266,59 @@ class FirebaseService {
                     group.enter()
                     // 해당 답변의 질문 가져오기
                     self.db.collection("questions").document(questionId).getDocument { questionDoc, error in
-                        if let questionData = questionDoc?.data(),
-                           let senderName = questionData["senderName"] as? String,
-                           let content = questionData["content"] as? String,
-                           let sentDate = (questionData["sentDate"] as? Timestamp)?.dateValue(),
-                           let isBookmarked = questionData["isBookmarked"] as? Bool,
-                           let bookmarkCount = questionData["bookmarkCount"] as? Int,
-                           let status = questionData["status"] as? String
-                        {
-                            let question = ChatBox(
-                                id: questionId,
-                                messageType: .question,
-                                senderName: senderName,
-                                content: content,
-                                sentDate: sentDate,
-                                isFromMe: true,
-                                mentorId: mentorId,
-                                isBookmarked: isBookmarked,
-                                bookmarkCount: bookmarkCount,
-                                questionId: nil,
-                                status: status
-                            )
-                            
-                            let answer = ChatBox(
-                                id: answerDoc.documentID,
-                                messageType: .answer,
-                                senderName: answerData["senderName"] as! String,
-                                content: answerData["content"] as! String,
-                                sentDate: sentDate,
-                                isFromMe: false,
-                                mentorId: mentorId,
-                                isBookmarked: isBookmarked,
-                                bookmarkCount: bookmarkCount,
-                                questionId: questionId,
-                                status: nil
-                            )
-                            
-                            allPairs.append((question: question, answer: answer))
+                        if let error = error {
+                            print("❌ 질문 데이터 가져오기 실패: \(error)")
+                            group.leave()
+                            return
                         }
+                        
+                        guard let questionData = questionDoc?.data() else {
+                            print("⚠️ 질문 데이터가 존재하지 않습니다. questionId: \(questionId)")
+                            group.leave()
+                            return
+                        }
+                        
+                        guard let senderName = questionData["senderName"] as? String,
+                              let content = questionData["content"] as? String,
+                              let sentDate = (questionData["sentDate"] as? Timestamp)?.dateValue(),
+                              let isBookmarked = questionData["isBookmarked"] as? Bool,
+                              let bookmarkCount = questionData["bookmarkCount"] as? Int,
+                              let status = questionData["status"] as? String
+                        else {
+                            print("⚠️ 질문 데이터 형식이 올바르지 않습니다. questionId: \(questionId)")
+                            group.leave()
+                            return
+                        }
+                        
+                        let question = ChatBox(
+                            id: questionId,
+                            messageType: .question,
+                            senderName: senderName,
+                            content: content,
+                            sentDate: sentDate,
+                            isFromMe: true,
+                            mentorId: mentorId,
+                            isBookmarked: isBookmarked,
+                            bookmarkCount: bookmarkCount,
+                            questionId: nil,
+                            status: status
+                        )
+                        
+                        let answer = ChatBox(
+                            id: answerDoc.documentID,
+                            messageType: .answer,
+                            senderName: answerData["senderName"] as! String,
+                            content: answerData["content"] as! String,
+                            sentDate: sentDate,
+                            isFromMe: false,
+                            mentorId: mentorId,
+                            isBookmarked: isBookmarked,
+                            bookmarkCount: bookmarkCount,
+                            questionId: questionId,
+                            status: nil
+                        )
+                        
+                        allPairs.append((question: question, answer: answer))
                         group.leave()
                     }
                 }
