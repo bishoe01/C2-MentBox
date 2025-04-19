@@ -4,6 +4,7 @@ struct ChatCardView: View {
     let question: ChatBox
     let answer: ChatBox
     @State private var isPressed = false
+    @State private var mentor: Mentor? = nil
     
     var body: some View {
         // 버튼을 버튼답게하는 간단한 애니메이션인데, 이거보다 그냥 테두리에 장난치는게 더 나을듯 ? -> 아마 Primary컬러로 blur주던지 그건 추후 
@@ -49,44 +50,43 @@ struct ChatCardView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     
                     HStack(spacing: 12) {
-                        
-                        Image(answer.recipient.profileImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                            )
-                        
-                        // name 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(answer.recipient.name)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
+                        if let mentor = mentor {
+                            Image(mentor.profileImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                )
                             
-                            Text(answer.recipient.expertise)
-                                .font(.system(size: 12))
-                                .foregroundColor(.yellow)
-                        }
-                        
-                        Spacer()
-                        
-                        
-                        if answer.bookmarkCount > 0 {
-                            HStack(spacing: 4) {
-                                Image(systemName: "bookmark.fill")
+                            // name 
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(mentor.name)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.white)
+                                
+                                Text(mentor.expertise)
                                     .font(.system(size: 12))
-                                Text("\(answer.bookmarkCount)")
-                                    .font(.system(size: 12))
+                                    .foregroundColor(.yellow)
                             }
-                            .foregroundColor(.yellow.opacity(0.8))
+                            
+                            Spacer()
+                            
+                            if answer.bookmarkCount > 0 {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "bookmark.fill")
+                                        .font(.system(size: 12))
+                                    Text("\(answer.bookmarkCount)")
+                                        .font(.system(size: 12))
+                                }
+                                .foregroundColor(.yellow.opacity(0.8))
+                            }
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
-                    
                     
                     Text(answer.content)
                         .font(.system(size: 15))
@@ -125,11 +125,21 @@ struct ChatCardView: View {
             .scaleEffect(isPressed ? 0.98 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            fetchMentor()
+        }
+    }
+    
+    private func fetchMentor() {
+        FirebaseService.shared.fetchMentors { mentors in
+            self.mentor = mentors.first { $0.id == answer.mentorId }
+        }
     }
 }
 
 #Preview {
     let previewMentor = Mentor(
+        id: "preview_mentor_id",
         name: "데이지",
         bio: "UX 디자이너",
         profileImage: "Daisy",
@@ -137,27 +147,31 @@ struct ChatCardView: View {
     )
     
     let previewQuestion = ChatBox(
+        id: "preview_question_id",
         messageType: .question,
         senderName: "사용자",
         content: "UX 디자인을 시작하려고 하는데, 어떤 것부터 시작하면 좋을까요?",
         sentDate: Date(),
         isFromMe: true,
-        recipient: previewMentor,
+        mentorId: previewMentor.id,
         isBookmarked: false,
         bookmarkCount: 5,
-        mentorId: previewMentor.id
+        questionId: nil,
+        status: "answered"
     )
     
     let previewAnswer = ChatBox(
+        id: "preview_answer_id",
         messageType: .answer,
         senderName: "데이지",
         content: "UX 디자인을 시작하시는 거라면, 먼저 사용자 리서치와 기본적인 디자인 원칙을 이해하는 것이 중요해요. 실제 사례를 분석하고 작은 프로젝트부터 시작해보는 것을 추천드립니다.",
         sentDate: Date(),
         isFromMe: false,
-        recipient: previewMentor,
+        mentorId: previewMentor.id,
         isBookmarked: true,
         bookmarkCount: 5,
-        mentorId: previewMentor.id
+        questionId: previewQuestion.id,
+        status: nil
     )
     
     ZStack {

@@ -2,13 +2,18 @@ import SwiftUI
 
 struct MyLetterView: View {
     @State private var selectedCategory: Category = .all
+    @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
+    @State private var mentors: [Mentor] = []
 
     var filteredChatPairs: [(question: ChatBox, answer: ChatBox)] {
         if selectedCategory == .all {
-            return MockChatBoxData.chatPairs
+            return chatPairs
         }
-        return MockChatBoxData.chatPairs.filter { pair in
-            pair.answer.recipient.expertise.lowercased() == selectedCategory.rawValue.lowercased()
+        return chatPairs.filter { pair in
+            if let mentor = mentors.first(where: { $0.id == pair.answer.mentorId }) {
+                return mentor.expertise.lowercased() == selectedCategory.rawValue.lowercased()
+            }
+            return false
         }
     }
 
@@ -33,6 +38,25 @@ struct MyLetterView: View {
         }
         .padding(.horizontal, 16)
         .edgesIgnoringSafeArea(.all)
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    private func loadData() {
+        let group = DispatchGroup()
+        
+        group.enter()
+        FirebaseService.shared.fetchMentors { fetchedMentors in
+            self.mentors = fetchedMentors
+            group.leave()
+        }
+        
+        group.enter()
+        FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
+            self.chatPairs = pairs
+            group.leave()
+        }
     }
 }
 

@@ -3,13 +3,16 @@ import SwiftUI
 struct MentorCardView: View {
     let mentor: Mentor
     @State private var isPressed = false
+    @State private var showDetail = false
     
     var profileImageName: String {
         "\(mentor.name)"
     }
     
     var body: some View {
-        NavigationLink(destination: MentorDetailView(mentor: mentor)) {
+        Button(action: {
+            showDetail = true
+        }) {
             VStack(alignment: .leading, spacing: 16) {
                 // 프로필이랑 카테고리 이모지 넣는 VSTACK
                 HStack(alignment: .top) {
@@ -87,6 +90,9 @@ struct MentorCardView: View {
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
         }
         .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showDetail) {
+            MentorDetailView(mentor: mentor)
+        }
     }
 }
 
@@ -95,6 +101,7 @@ struct MentorCardView_Previews: PreviewProvider {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             MentorCardView(mentor: Mentor(
+                id: "preview_mentor_id",
                 name: "김멘토",
                 bio: "10년차 iOS 개발자",
                 profileImage: "profile_image",

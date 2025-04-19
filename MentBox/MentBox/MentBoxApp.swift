@@ -14,7 +14,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct MentBoxApp: App {
-    // Firebase 초기화를 위해 AppDelegate 등록
+    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {

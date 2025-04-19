@@ -2,8 +2,7 @@ import SwiftUI
 
 struct MentorsSection: View {
     @State private var selectedCategory: Category = .all
-    
-    let mentors = MockMentorData.mentors
+    let mentors: [Mentor]
     
     var filteredMentors: [Mentor] {
         if selectedCategory == .all {
@@ -36,7 +35,7 @@ struct MentorsSection_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
-            MentorsSection()
+            MentorsSection(mentors: [])
         }
     }
 }
