@@ -144,7 +144,8 @@ struct ChatCardView: View {
         isFromMe: true,
         recipient: previewMentor,
         isBookmarked: false,
-        bookmarkCount: 5
+        bookmarkCount: 5,
+        mentorId: previewMentor.id
     )
     
     let previewAnswer = ChatBox(
@@ -155,10 +156,11 @@ struct ChatCardView: View {
         isFromMe: false,
         recipient: previewMentor,
         isBookmarked: true,
-        bookmarkCount: 5
+        bookmarkCount: 5,
+        mentorId: previewMentor.id
     )
     
-    return ZStack {
+    ZStack {
         Color.black.edgesIgnoringSafeArea(.all)
         ChatCardView(question: previewQuestion, answer: previewAnswer)
             .padding()

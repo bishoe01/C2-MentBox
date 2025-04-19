@@ -12,7 +12,7 @@ enum MenterFontStyle {
     var font: Font {
         switch self {
         case .header:
-            return .custom("PretendardVariable-Bold", size: 24)
+            return .custom("PretendardVariable-Bold", size: 26)
         case .subtitle:
             return .custom("PretendardVariable-SemiBold", size: 20)
         case .body:

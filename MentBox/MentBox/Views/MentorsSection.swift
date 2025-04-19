@@ -18,7 +18,7 @@ struct MentorsSection: View {
                 selectedCategory: $selectedCategory,
                 title: "운영중인 멘토",
                 onSeeAll: {},
-                showSeeAll: true
+                showSeeAll: false
             )
             
             ScrollView(.horizontal, showsIndicators: false) {

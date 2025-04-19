@@ -9,19 +9,9 @@ struct MentorCardView: View {
     }
     
     var body: some View {
-        Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                isPressed = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation {
-                    isPressed = false
-                }
-            }
-            
-        }) {
+        NavigationLink(destination: MentorDetailView(mentor: mentor)) {
             VStack(alignment: .leading, spacing: 16) {
-                // 프로필이랑 카테고리 이모지 넣는 VSTACK 
+                // 프로필이랑 카테고리 이모지 넣는 VSTACK
                 HStack(alignment: .top) {
                     Image(profileImageName)
                         .resizable()
@@ -35,9 +25,9 @@ struct MentorCardView: View {
                     
                     Spacer()
                     
-                    // 카테고리별 이모지 -> 아마 라벨같은거로 바뀌어도 괜찮을수도 ? 
+                    // 카테고리별 이모지 -> 아마 라벨같은거로 바뀌어도 괜찮을수도 ?
                     Text(mentor.expertise == "Tech" ? "👨‍💻" :
-                         mentor.expertise == "Design" ? "🎨" : "💼")
+                        mentor.expertise == "Design" ? "🎨" : "💼")
                         .font(.system(size: 24))
                 }
                 
@@ -67,8 +57,8 @@ struct MentorCardView: View {
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color("btn_dark").opacity(0.95),
-                                Color("btn_light").opacity(0.95)
+                                Color("btn_dark"),
+                                Color("btn_light")
                             ]),
                             startPoint: .top,
                             endPoint: .bottom
@@ -112,4 +102,4 @@ struct MentorCardView_Previews: PreviewProvider {
             ))
         }
     }
-} 
+}
