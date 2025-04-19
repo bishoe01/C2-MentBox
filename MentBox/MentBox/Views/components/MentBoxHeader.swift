@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MentBoxHeader: View {
     let title: String
+    var isPadding: Bool = true
 
     var body: some View {
         HStack {
@@ -11,6 +12,6 @@ struct MentBoxHeader: View {
 
             Spacer()
         }
-        .padding()
+        .padding(.horizontal, isPadding ? 16 : 0)
     }
 }

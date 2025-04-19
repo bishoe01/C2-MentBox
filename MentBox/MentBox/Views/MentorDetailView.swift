@@ -12,30 +12,39 @@ struct MentorDetailView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Image("BG")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
             
             ScrollView {
                 VStack(spacing: 20) {
                     // 멘토 프로필 섹션
-                    VStack(spacing: 16) {
-                        Image(mentor.profileImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 2)
-                            )
-                        
-                        Text(mentor.name)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        
-                        Text(mentor.expertise)
-                            .font(.headline)
-                            .foregroundColor(.yellow)
+                    VStack(spacing: 12) {
+                        HStack(spacing: 16) {
+                            Image(mentor.profileImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 70, height: 70)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 2)
+                                )
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(mentor.name)
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                
+                                Text(mentor.expertise)
+                                    .font(.subheadline)
+                                    .foregroundColor(.yellow)
+                            }
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                         
                         Text(mentor.bio)
                             .font(.body)
@@ -43,7 +52,26 @@ struct MentorDetailView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
-                    .padding(.vertical)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color("btn_dark").opacity(0.3),
+                                        Color("btn_light").opacity(0.3)
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color("lightGray"), lineWidth: 1)
+                            )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
                     
                     // 멘토가 답변한 사연들
                     VStack(alignment: .leading, spacing: 20) {

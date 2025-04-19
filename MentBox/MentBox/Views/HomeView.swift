@@ -11,7 +11,7 @@ struct HomeView: View {
                 ScrollView {
                     VStack(spacing: 30) {
                         VStack(spacing: 5) {
-                            MentBoxHeader(title: "MENTBOX")
+                            MentBoxHeader(title: "MENTBOX", isPadding: false)
                             MentorsSection()
                         }
 
