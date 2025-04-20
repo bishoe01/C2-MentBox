@@ -1,16 +1,20 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ChatCardView: View {
     let question: ChatBox
     let answer: ChatBox
     @State private var isPressed = false
     @State private var mentor: Mentor? = nil
+    @State private var isBookmarked = false
+    @State private var showBookmarkAnimation = false
     
     var body: some View {
         // 버튼을 버튼답게하는 간단한 애니메이션인데, 이거보다 그냥 테두리에 장난치는게 더 나을듯 ? -> 아마 Primary컬러로 blur주던지 그건 추후 
         Button(action: {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 isPressed = true
+                toggleBookmark()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation {
@@ -74,14 +78,23 @@ struct ChatCardView: View {
                             
                             Spacer()
                             
-                            if answer.bookmarkCount > 0 {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "bookmark.fill")
+                            HStack(spacing: 4) {
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                        toggleBookmark()
+                                    }
+                                }) {
+                                    Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                                         .font(.system(size: 12))
+                                        .foregroundColor(isBookmarked ? .yellow : .yellow.opacity(0.8))
+                                        .scaleEffect(showBookmarkAnimation ? 1.2 : 1.0)
+                                }
+                                
+                                if answer.bookmarkCount > 0 {
                                     Text("\(answer.bookmarkCount)")
                                         .font(.system(size: 12))
+                                        .foregroundColor(.yellow.opacity(0.8))
                                 }
-                                .foregroundColor(.yellow.opacity(0.8))
                             }
                         }
                     }
@@ -113,13 +126,13 @@ struct ChatCardView: View {
                     .strokeBorder(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color("lightGray").opacity(0.6),
-                                Color("lightGray").opacity(0.3)
+                                isBookmarked ? Color.yellow.opacity(0.6) : Color("lightGray").opacity(0.6),
+                                isBookmarked ? Color.yellow.opacity(0.3) : Color("lightGray").opacity(0.3)
                             ]),
                             startPoint: .top,
                             endPoint: .bottom
                         ),
-                        lineWidth: 1
+                        lineWidth: isBookmarked ? 2 : 1
                     )
             )
             .scaleEffect(isPressed ? 0.98 : 1.0)
@@ -127,12 +140,55 @@ struct ChatCardView: View {
         .buttonStyle(PlainButtonStyle())
         .onAppear {
             fetchMentor()
+            checkBookmarkStatus()
         }
     }
     
     private func fetchMentor() {
         FirebaseService.shared.fetchMentors { mentors in
             self.mentor = mentors.first { $0.id == answer.mentorId }
+        }
+    }
+    
+    private func checkBookmarkStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        Task {
+            do {
+                let bookmarkedQuestions = try await FirebaseService.shared.getBookmarkedQuestions(userId: userId)
+                isBookmarked = bookmarkedQuestions.contains(question.id)
+            } catch {
+                print("❌ 북마크 상태 확인 실패: \(error)")
+            }
+        }
+    }
+    
+    private func toggleBookmark() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            showBookmarkAnimation = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation {
+                showBookmarkAnimation = false
+            }
+        }
+        
+        Task {
+            do {
+                if isBookmarked {
+                    try await FirebaseService.shared.removeBookmark(questionId: question.id, userId: userId)
+                } else {
+                    try await FirebaseService.shared.addBookmark(questionId: question.id, userId: userId)
+                }
+                withAnimation {
+                    isBookmarked.toggle()
+                }
+            } catch {
+                print("❌ 북마크 토글 실패: \(error)")
+            }
         }
     }
 }
