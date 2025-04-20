@@ -4,6 +4,7 @@ struct HomeView: View {
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
+    @State private var selectedMentor: Mentor? = nil
     
     var body: some View {
         NavigationView {
@@ -21,7 +22,7 @@ struct HomeView: View {
                         VStack(spacing: 30) {
                             VStack(spacing: 5) {
                                 MentBoxHeader(title: "MENTBOX", isPadding: false)
-                                MentorsSection(mentors: mentors)
+                                MentorsSection(mentors: mentors, selectedMentor: $selectedMentor)
                             }
 
                             VStack {
@@ -62,6 +63,18 @@ struct HomeView: View {
             .onAppear {
                 loadData()
             }
+            .background(
+                NavigationLink(
+                    destination: MentorDetailView(mentor: selectedMentor ?? mentors[0])
+                        .navigationBarHidden(true),
+                    isActive: Binding(
+                        get: { selectedMentor != nil },
+                        set: { if !$0 { selectedMentor = nil } }
+                    )
+                ) {
+                    EmptyView()
+                }
+            )
         }
     }
     

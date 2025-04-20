@@ -118,32 +118,36 @@ class FirebaseService {
     
     // 특정 멘토의 질문-답변 쌍 가져오기
     func fetchQuestionAnswerPairs(for mentorId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
+        print("🔍 fetchQuestionAnswerPairs 시작 - mentorId: \(mentorId)")
+        
         // 멘토 정보 가져오기
         self.db.collection("mentors").document(mentorId).getDocument { mentorDoc, error in
-            guard let mentorData = mentorDoc?.data(),
-                  let mentorName = mentorData["name"] as? String,
-                  let mentorBio = mentorData["bio"] as? String,
-                  let mentorProfileImage = mentorData["profileImage"] as? String,
-                  let mentorExpertise = mentorData["expertise"] as? String
-            else {
-                print("❌ 멘토 데이터 가져오기 실패")
+            if let error = error {
+                print("❌ 멘토 데이터 가져오기 실패: \(error)")
                 completion([])
                 return
             }
             
+            guard let mentorData = mentorDoc?.data() else {
+                print("⚠️ 멘토 데이터가 존재하지 않습니다. mentorId: \(mentorId)")
+                completion([])
+                return
+            }
+            
+            print("✅ 멘토 데이터 가져오기 성공: \(mentorData)")
+            
             let mentor = Mentor(
                 id: mentorId,
-                name: mentorName,
-                bio: mentorBio,
-                profileImage: mentorProfileImage,
-                expertise: mentorExpertise
+                name: mentorData["name"] as? String ?? "",
+                bio: mentorData["bio"] as? String ?? "",
+                profileImage: mentorData["profileImage"] as? String ?? "",
+                expertise: mentorData["expertise"] as? String ?? ""
             )
             
             // 질문 가져오기
             self.db.collection("questions")
                 .whereField("mentorId", isEqualTo: mentorId)
                 .whereField("status", isEqualTo: "answered")
-                .order(by: "sentDate", descending: true)
                 .getDocuments { questionSnapshot, error in
                     if let error = error {
                         print("❌ 질문 데이터 가져오기 실패: \(error)")

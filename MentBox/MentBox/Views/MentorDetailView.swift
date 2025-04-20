@@ -110,7 +110,9 @@ struct MentorDetailView: View {
     }
     
     private func loadChatPairs() {
+        print("🔍 MentorDetailView - loadChatPairs 시작 - mentorId: \(mentor.id)")
         FirebaseService.shared.fetchQuestionAnswerPairs(for: mentor.id) { pairs in
+            print("✅ MentorDetailView - 데이터 로드 완료 - pairs 개수: \(pairs.count)")
             self.chatPairs = pairs
         }
     }
