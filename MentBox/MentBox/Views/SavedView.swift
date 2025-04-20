@@ -42,16 +42,16 @@ struct SavedView: View {
             loadData()
         }
     }
-    
+
     private func loadData() {
         let group = DispatchGroup()
-        
+
         group.enter()
         FirebaseService.shared.fetchMentors { fetchedMentors in
             self.mentors = fetchedMentors
             group.leave()
         }
-        
+
         group.enter()
         FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
             self.chatPairs = pairs

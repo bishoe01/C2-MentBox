@@ -7,6 +7,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
+        
+        // 데이터 초기화 실행
+        Task {
+            do {
+                print("🔥 Firebase 데이터 초기화 확인 중...")
+                try await FirebaseService.shared.resetAndUploadData()
+            } catch {
+                print("❌ Firebase 데이터 초기화 실패: \(error)")
+            }
+        }
+        
         return true
     }
 }
@@ -18,7 +29,7 @@ struct MentBoxApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                ContentView()
+                SignInView()
             }
         }
     }

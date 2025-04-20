@@ -15,12 +15,12 @@ enum MentorCategory: String, CaseIterable {
 struct ChatBox: Identifiable {
     let id: String // Firebase 문서 ID
     let messageType: MessageType
-    let senderName: String // 보낸사람
+    let userId: String // Firebase Auth UID 또는 임시 UUID
+    let senderName: String // 보낸사람 이름 (닉네임)
     let content: String // 메세지
     let sentDate: Date
     let isFromMe: Bool // 내가 보낸건지
     let mentorId: String // 어떤 멘토한테 보낼것인지
-    let isBookmarked: Bool // 내가 저장한 것인지
     let bookmarkCount: Int // 저장한 사람의 수
     
     // 질문인 경우에만 사용되는 필드
@@ -37,10 +37,15 @@ struct Mentor: Identifiable {
 }
 
 struct Learner: Identifiable {
-    let id: String // Firebase 문서 ID
-    let name: String // 혹은 닉네임 or 익명 ID
-    let category: String // 관심 분야: "Tech", "Design", etc
-    let letterCount: Int // 지금까지 보낸 편지 수
+    let id: String // Firebase Auth UID
+    let name: String // 사용자 이름
+    let email: String // 이메일
+    let profileImage: String? // 프로필 이미지 URL
+    let category: String // 관심 분야
+    let letterCount: Int // 보낸 편지 수
+    let bookmarkedCount: Int // 북마크한 수
+    let createdAt: Date // 가입일
+    let lastLoginAt: Date // 마지막 로그인 시간
 }
 
 // 프리뷰용 샘플 데이터
@@ -56,12 +61,12 @@ let previewMentor = Mentor(
 let previewQuestion = ChatBox(
     id: "preview_question_id",
     messageType: .question,
+    userId: "preview_user_id",
     senderName: "사용자",
     content: "질문 내용",
     sentDate: Date(),
     isFromMe: true,
     mentorId: previewMentor.id,
-    isBookmarked: false,
     bookmarkCount: 0,
     questionId: nil,
     status: "answered"
@@ -71,12 +76,12 @@ let previewQuestion = ChatBox(
 let previewAnswer = ChatBox(
     id: "preview_answer_id",
     messageType: .answer,
+    userId: "preview_mentor_id",
     senderName: "멘토",
     content: "답변 내용",
     sentDate: Date(),
     isFromMe: false,
     mentorId: previewMentor.id,
-    isBookmarked: false,
     bookmarkCount: 0,
     questionId: previewQuestion.id,
     status: nil

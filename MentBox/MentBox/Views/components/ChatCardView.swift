@@ -149,12 +149,12 @@ struct ChatCardView: View {
     let previewQuestion = ChatBox(
         id: "preview_question_id",
         messageType: .question,
+        userId: "preview_user_id",
         senderName: "사용자",
         content: "UX 디자인을 시작하려고 하는데, 어떤 것부터 시작하면 좋을까요?",
         sentDate: Date(),
         isFromMe: true,
         mentorId: previewMentor.id,
-        isBookmarked: false,
         bookmarkCount: 5,
         questionId: nil,
         status: "answered"
@@ -163,12 +163,12 @@ struct ChatCardView: View {
     let previewAnswer = ChatBox(
         id: "preview_answer_id",
         messageType: .answer,
+        userId: previewMentor.id,
         senderName: "데이지",
         content: "UX 디자인을 시작하시는 거라면, 먼저 사용자 리서치와 기본적인 디자인 원칙을 이해하는 것이 중요해요. 실제 사례를 분석하고 작은 프로젝트부터 시작해보는 것을 추천드립니다.",
         sentDate: Date(),
         isFromMe: false,
         mentorId: previewMentor.id,
-        isBookmarked: true,
         bookmarkCount: 5,
         questionId: previewQuestion.id,
         status: nil

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2302722D2DB506AB00E2663C /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2302722C2DB506AB00E2663C /* FirebaseCore */; };
 		235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32D82DAAB23800373363 /* PretendardVariable.ttf */; };
 		235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */; };
 		23F5A3C42DA3FC4B000149D6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */; };
@@ -51,6 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				23F5A3C42DA3FC4B000149D6 /* FirebaseAuth in Frameworks */,
+				2302722D2DB506AB00E2663C /* FirebaseCore in Frameworks */,
 				23F5A3C62DA3FC4B000149D6 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -58,6 +60,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2302722B2DB506AB00E2663C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		235F32C32DAAB12500373363 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -73,6 +82,7 @@
 				23FC06AE2DABFB1800FF995D /* Core */,
 				235F32C32DAAB12500373363 /* Fonts */,
 				23F5A3B12DA3F906000149D6 /* MentBox */,
+				2302722B2DB506AB00E2663C /* Frameworks */,
 				23F5A3B02DA3F906000149D6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,6 +118,7 @@
 			packageProductDependencies = (
 				23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */,
 				23F5A3C52DA3FC4B000149D6 /* FirebaseFirestore */,
+				2302722C2DB506AB00E2663C /* FirebaseCore */,
 			);
 			productName = MentBox;
 			productReference = 23F5A3AF2DA3F906000149D6 /* MentBox.app */;
@@ -297,6 +308,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MentBox/MentBox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MentBox/Preview Content\"";
@@ -330,6 +342,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MentBox/MentBox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MentBox/Preview Content\"";
@@ -393,6 +406,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2302722C2DB506AB00E2663C /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 23F5A3C22DA3FC4B000149D6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
 		23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 23F5A3C22DA3FC4B000149D6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
