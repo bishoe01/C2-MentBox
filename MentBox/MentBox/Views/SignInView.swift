@@ -100,28 +100,29 @@ struct SignInView: View {
             changeRequest.displayName = displayName
         }
         
-        // Firestore에 사용자 정보 저장
-        let userData: [String: Any] = [
-            "id": user.uid,
-            "name": changeRequest.displayName ?? "",
-            "email": appleIDCredential.email ?? "",
-            "createdAt": Date(),
-            "lastLogin": Date(),
-            "category": "", // 기본값
-            "profileImage": "", // 기본값
-            "letterCount": 0,
-            "bookmarkedCount": 0,
-            "bookmarkedQuestions": [], // 북마크한 질문 ID 배열
-            "sentQuestions": [] // 보낸 질문 ID 배열
-        ]
+        // Learner 모델 생성
+        let learner = Learner(
+            id: user.uid,
+            name: changeRequest.displayName ?? "",
+            email: appleIDCredential.email ?? "",
+            profileImage: nil,
+            category: "",
+            letterCount: 0,
+            bookmarkedCount: 0,
+            createdAt: Date(),
+            lastLoginAt: Date(),
+            bookmarkedQuestions: [],
+            sentQuestions: []
+        )
         
-        // Firestore에 사용자 문서 생성
-        Firestore.firestore().collection("learners").document(user.uid).setData(userData) { error in
-            if let error = error {
+        // Firestore에 사용자 정보 저장
+        Task {
+            do {
+                try await FirebaseService.shared.createLearner(learner: learner)
+                print("✅ 사용자 정보 저장 성공")
+            } catch {
                 print("❌ 사용자 정보 저장 실패: \(error.localizedDescription)")
                 errorMessage = "사용자 정보 저장에 실패했습니다."
-            } else {
-                print("✅ 사용자 정보 저장 성공")
             }
             isLoading = false
         }

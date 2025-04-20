@@ -1,9 +1,11 @@
 import SwiftUI
+import FirebaseAuth
 
 struct MyLetterView: View {
     @State private var selectedCategory: Category = .all
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
+    @State private var isLoading = true
 
     var filteredChatPairs: [(question: ChatBox, answer: ChatBox)] {
         if selectedCategory == .all {
@@ -27,13 +29,22 @@ struct MyLetterView: View {
                     showSeeAll: false
                 )
 
-                VStack(spacing: 20) {
-                    ForEach(filteredChatPairs.indices, id: \.self) { index in
-                        let pair = filteredChatPairs[index]
-                        ChatCardView(question: pair.question, answer: pair.answer)
+                if isLoading {
+                    ProgressView()
+                        .padding()
+                } else if chatPairs.isEmpty {
+                    Text("보낸 질문이 없습니다.")
+                        .foregroundColor(.white)
+                        .padding()
+                } else {
+                    VStack(spacing: 20) {
+                        ForEach(filteredChatPairs.indices, id: \.self) { index in
+                            let pair = filteredChatPairs[index]
+                            ChatCardView(question: pair.question, answer: pair.answer)
+                        }
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
         }
         .padding(.horizontal, 16)
@@ -44,6 +55,12 @@ struct MyLetterView: View {
     }
     
     private func loadData() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("❌ 로그인된 사용자가 없습니다.")
+            isLoading = false
+            return
+        }
+
         let group = DispatchGroup()
         
         group.enter()
@@ -53,9 +70,13 @@ struct MyLetterView: View {
         }
         
         group.enter()
-        FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
+        FirebaseService.shared.fetchSentQuestionAnswerPairs(userId: userId) { pairs in
             self.chatPairs = pairs
             group.leave()
+        }
+
+        group.notify(queue: .main) {
+            isLoading = false
         }
     }
 }
