@@ -3,6 +3,7 @@ import SwiftUI
 struct MentorsSection: View {
     @State private var selectedCategory: Category = .all
     let mentors: [Mentor]
+    @Binding var selectedMentor: Mentor?
     
     var filteredMentors: [Mentor] {
         if selectedCategory == .all {
@@ -21,11 +22,16 @@ struct MentorsSection: View {
             )
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
+                HStack(spacing: 16) {
                     ForEach(filteredMentors) { mentor in
-                        MentorCardView(mentor: mentor)
+                        Button(action: {
+                            selectedMentor = mentor
+                        }) {
+                            MentorCardView(mentor: mentor)
+                        }
                     }
                 }
+                .padding(.horizontal)
             }
         }
     }
@@ -35,7 +41,7 @@ struct MentorsSection_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
-            MentorsSection(mentors: [])
+            MentorsSection(mentors: [], selectedMentor: .constant(nil))
         }
     }
 }

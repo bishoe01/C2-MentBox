@@ -65,8 +65,12 @@ struct HomeView: View {
             }
             .background(
                 NavigationLink(
-                    destination: MentorDetailView(mentor: selectedMentor ?? mentors[0])
-                        .navigationBarHidden(true),
+                    destination: Group {
+                        if let mentor = selectedMentor {
+                            MentorDetailView(mentor: mentor)
+                                .navigationBarHidden(true)
+                        }
+                    },
                     isActive: Binding(
                         get: { selectedMentor != nil },
                         set: { if !$0 { selectedMentor = nil } }
@@ -76,6 +80,7 @@ struct HomeView: View {
                 }
             )
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
     
     private func loadData() {
