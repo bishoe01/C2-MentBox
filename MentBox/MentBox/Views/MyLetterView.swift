@@ -81,7 +81,7 @@ struct MyLetterView: View {
     }
 }
 
-// preview
+
 struct MyLetterView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {

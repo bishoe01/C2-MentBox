@@ -81,6 +81,7 @@ struct ChatCardView: View {
                             HStack(spacing: 4) {
                                 Button(action: {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                        // MARK : 북마크 토클 함수 
                                         toggleBookmark()
                                     }
                                 }) {

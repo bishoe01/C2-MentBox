@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 struct MentorDetailView: View {
     let mentor: Mentor
@@ -132,7 +134,7 @@ struct MentorDetailView: View {
                         }
                         
                         Button(action: {
-                            submitQuestion()
+                            checkPendingQuestion()
                         }) {
                             Image(systemName: "paperplane.fill")
                                 .font(.system(size: 20))
@@ -169,17 +171,95 @@ struct MentorDetailView: View {
         }
     }
     
+    private func checkPendingQuestion() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            alertMessage = "로그인이 필요합니다."
+            showAlert = true
+            return
+        }
+        
+        isSubmitting = true
+        
+        FirebaseService.shared.canSendQuestion(userId: userId, mentorId: mentor.id) { canSend in
+            isSubmitting = false
+            
+            if canSend {
+                self.submitQuestion()
+            } else {
+                self.alertMessage = "이미 답변을 기다리고 있는 질문이 있습니다. 답변이 완료된 후에 새로운 질문을 보낼 수 있습니다."
+                self.showAlert = true
+            }
+        }
+    }
+    
     private func submitQuestion() {
         guard !questionText.isEmpty else { return }
         
         isSubmitting = true
         
+        // Firebase에 질문 저장
+        let questionId = UUID().uuidString
+        let question = ChatBox(
+            id: questionId,
+            messageType: .question,
+            userId: Auth.auth().currentUser?.uid ?? "",
+            senderName: Auth.auth().currentUser?.displayName ?? "익명",
+            content: questionText,
+            sentDate: Date(),
+            isFromMe: true,
+            mentorId: mentor.id,
+            bookmarkCount: 0,
+            questionId: nil,
+            status: "pending"
+        )
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            isSubmitting = false
-            alertMessage = "편지가 성공적으로 전송되었습니다."
-            showAlert = true
-            questionText = ""
+        // questions 컬렉션에 질문 저장
+        let db = Firestore.firestore()
+        let questionData: [String: Any] = [
+            "id": question.id,
+            "userId": question.userId,
+            "senderName": question.senderName,
+            "content": question.content,
+            "sentDate": Timestamp(date: question.sentDate),
+            "mentorId": question.mentorId,
+            "status": question.status ?? "pending",
+            "bookmarkCount": question.bookmarkCount
+        ]
+        
+        // learner 컬렉션의 sentQuestions 필드 업데이트
+        if let userId = Auth.auth().currentUser?.uid {
+            db.collection("learners").document(userId).getDocument { document, error in
+                if let error = error {
+                    print("❌ 사용자 데이터 가져오기 실패: \(error)")
+                    return
+                }
+                
+                var sentQuestions = document?.data()?["sentQuestions"] as? [String] ?? []
+                sentQuestions.append(questionId)
+                
+                // 질문 저장과 sentQuestions 업데이트를 하나의 배치로 처리
+                let batch = db.batch()
+                
+                let questionRef = db.collection("questions").document(questionId)
+                batch.setData(questionData, forDocument: questionRef)
+                
+                let learnerRef = db.collection("learners").document(userId)
+                batch.updateData(["sentQuestions": sentQuestions], forDocument: learnerRef)
+                
+                batch.commit { error in
+                    if let error = error {
+                        print("❌ 데이터 저장 실패: \(error)")
+                        self.alertMessage = "편지 전송에 실패했습니다."
+                        self.showAlert = true
+                    } else {
+                        print("✅ 데이터 저장 성공")
+                        self.alertMessage = "편지가 성공적으로 전송되었습니다. 답변을 기다려주세요."
+                        self.showAlert = true
+                        self.questionText = ""
+                    }
+                    self.isSubmitting = false
+                }
+            }
         }
     }
     

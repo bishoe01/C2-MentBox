@@ -458,16 +458,15 @@ class FirebaseService {
     func canSendQuestion(userId: String, mentorId: String, completion: @escaping (Bool) -> Void) {
         self.db.collection("questions")
             .whereField("userId", isEqualTo: userId)
-            .whereField("mentorId", isEqualTo: mentorId)
             .whereField("status", isEqualTo: "pending")
             .getDocuments { snapshot, error in
                 if let error = error {
-                    print("❌ 편지 제한 확인 실패: \(error)")
+                    print("❌ 질문 확인 실패: \(error)")
                     completion(false)
                     return
                 }
                 
-                // pending 상태인 질문이 없으면 true
+                // pending 상태인 질문이 없으면 true (새 질문 가능)
                 completion(snapshot?.documents.isEmpty ?? true)
             }
     }
@@ -515,7 +514,7 @@ class FirebaseService {
         ])
     }
     
-    // 사용자의 북마크 목록 가져오기
+    // USER BOOK MARK 가져오는 함수  ->  learner 컬렉션에서 bookmarkedQuestions 필드 값 가져오기  
     func getBookmarkedQuestions(userId: String) async throws -> [String] {
         let db = Firestore.firestore()
         let userDoc = try await db.collection("learners").document(userId).getDocument()
@@ -525,177 +524,8 @@ class FirebaseService {
         }
         return []
     }
-    
-    // 사용자의 보낸 질문 목록 가져오기
-    func getSentQuestions(userId: String) async throws -> [String] {
-        let db = Firestore.firestore()
-        let userDoc = try await db.collection("learners").document(userId).getDocument()
-        
-        if let sentQuestions = userDoc.data()?["sentQuestions"] as? [String] {
-            return sentQuestions
-        }
-        return []
-    }
-    
-    // MARK: - 사용자 관련 메서드
-    
-    // 사용자 생성
-    func createLearner(learner: Learner) async throws {
-        let learnerData: [String: Any] = [
-            "name": learner.name,
-            "email": learner.email,
-            "profileImage": learner.profileImage as Any,
-            "category": learner.category,
-            "letterCount": learner.letterCount,
-            "bookmarkedCount": learner.bookmarkedCount,
-            "createdAt": Timestamp(date: learner.createdAt),
-            "lastLoginAt": Timestamp(date: learner.lastLoginAt),
-            "bookmarkedQuestions": learner.bookmarkedQuestions,
-            "sentQuestions": learner.sentQuestions
-        ]
-        
-        try await db.collection("learners").document(learner.id).setData(learnerData)
-    }
-    
-    // 사용자 정보 가져오기
-    func fetchLearner(userId: String) async throws -> Learner? {
-        let document = try await db.collection("learners").document(userId).getDocument()
-        
-        guard let data = document.data() else { return nil }
-        
-        return Learner(
-            id: document.documentID,
-            name: data["name"] as? String ?? "",
-            email: data["email"] as? String ?? "",
-            profileImage: data["profileImage"] as? String,
-            category: data["category"] as? String ?? "",
-            letterCount: data["letterCount"] as? Int ?? 0,
-            bookmarkedCount: data["bookmarkedCount"] as? Int ?? 0,
-            createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
-            lastLoginAt: (data["lastLoginAt"] as? Timestamp)?.dateValue() ?? Date(),
-            bookmarkedQuestions: data["bookmarkedQuestions"] as? [String] ?? [],
-            sentQuestions: data["sentQuestions"] as? [String] ?? []
-        )
-    }
-    
-    // 사용자의 북마크된 질문-답변 쌍 가져오기
-    func fetchBookmarkedQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
-        Task {
-            do {
-                let bookmarkedQuestionIds = try await getBookmarkedQuestions(userId: userId)
-                var pairs: [(question: ChatBox, answer: ChatBox)] = []
-                
-                for questionId in bookmarkedQuestionIds {
-                    if let pair = try await fetchQuestionAnswerPair(questionId: questionId) {
-                        pairs.append(pair)
-                    }
-                }
-                
-                completion(pairs.sorted { $0.question.sentDate > $1.question.sentDate })
-            } catch {
-                print("❌ 북마크된 질문 가져오기 실패: \(error)")
-                completion([])
-            }
-        }
-    }
-    
-    // 사용자의 보낸 질문-답변 쌍 가져오기
-    func fetchSentQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
-        print("🔍 fetchSentQuestionAnswerPairs 시작 - userId: \(userId)")
-        
-        // userId가 일치하는 질문들 가져오기
-        self.db.collection("questions")
-            .whereField("userId", isEqualTo: userId)
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    print("❌ 질문 데이터 가져오기 실패: \(error)")
-                    completion([])
-                    return
-                }
-                
-                var pairs: [(question: ChatBox, answer: ChatBox)] = []
-                let group = DispatchGroup()
-                
-                for questionDoc in snapshot?.documents ?? [] {
-                    let questionData = questionDoc.data()
-                    guard let userId = questionData["userId"] as? String,
-                          let senderName = questionData["senderName"] as? String,
-                          let content = questionData["content"] as? String,
-                          let sentDate = (questionData["sentDate"] as? Timestamp)?.dateValue(),
-                          let mentorId = questionData["mentorId"] as? String,
-                          let bookmarkCount = questionData["bookmarkCount"] as? Int,
-                          let status = questionData["status"] as? String
-                    else {
-                        print("⚠️ 질문 데이터 형식이 올바르지 않습니다. questionId: \(questionDoc.documentID)")
-                        continue
-                    }
-                    
-                    let question = ChatBox(
-                        id: questionDoc.documentID,
-                        messageType: .question,
-                        userId: userId,
-                        senderName: senderName,
-                        content: content,
-                        sentDate: sentDate,
-                        isFromMe: true,
-                        mentorId: mentorId,
-                        bookmarkCount: bookmarkCount,
-                        questionId: nil,
-                        status: status
-                    )
-                    
-                    group.enter()
-                    // 해당 질문의 답변 가져오기
-                    self.db.collection("answers")
-                        .whereField("questionId", isEqualTo: questionDoc.documentID)
-                        .getDocuments { answerSnapshot, error in
-                            defer { group.leave() }
-                            
-                            if let error = error {
-                                print("❌ 답변 데이터 가져오기 실패: \(error)")
-                                return
-                            }
-                            
-                            guard let answerDoc = answerSnapshot?.documents.first else {
-                                print("⚠️ 답변 없음 - questionId: \(questionDoc.documentID)")
-                                return
-                            }
-                            
-                            let answerData = answerDoc.data()
-                            if let userId = answerData["userId"] as? String,
-                               let senderName = answerData["senderName"] as? String,
-                               let content = answerData["content"] as? String,
-                               let sentDate = (answerData["sentDate"] as? Timestamp)?.dateValue(),
-                               let bookmarkCount = answerData["bookmarkCount"] as? Int
-                            {
-                                let answer = ChatBox(
-                                    id: answerDoc.documentID,
-                                    messageType: .answer,
-                                    userId: userId,
-                                    senderName: senderName,
-                                    content: content,
-                                    sentDate: sentDate,
-                                    isFromMe: false,
-                                    mentorId: mentorId,
-                                    bookmarkCount: bookmarkCount,
-                                    questionId: questionDoc.documentID,
-                                    status: nil
-                                )
-                                pairs.append((question: question, answer: answer))
-                            } else {
-                                print("⚠️ 답변 데이터 형식이 올바르지 않습니다. answerId: \(answerDoc.documentID)")
-                            }
-                        }
-                }
-                
-                group.notify(queue: .main) {
-                    print("✅ 보낸 질문-답변 쌍 가져오기 완료: \(pairs.count)개")
-                    completion(pairs.sorted { $0.question.sentDate > $1.question.sentDate })
-                }
-            }
-    }
-    
-    // 질문-답변 쌍 가져오기 (내부용)
+
+    // 공통 함수
     private func fetchQuestionAnswerPair(questionId: String) async throws -> (question: ChatBox, answer: ChatBox)? {
         let questionDoc = try await db.collection("questions").document(questionId).getDocument()
         guard let questionData = questionDoc.data() else { return nil }
@@ -736,5 +566,104 @@ class FirebaseService {
         )
         
         return (question: question, answer: answer)
+    }
+
+    // 북마크
+    func fetchBookmarkedQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
+        Task {
+            do {
+                let bookmarkedQuestionIds = try await getBookmarkedQuestions(userId: userId)
+                var pairs: [(question: ChatBox, answer: ChatBox)] = []
+                
+                for questionId in bookmarkedQuestionIds {
+                    if let pair = try await fetchQuestionAnswerPair(questionId: questionId) {
+                        pairs.append(pair)
+                    }
+                }
+                
+                completion(pairs.sorted { $0.question.sentDate > $1.question.sentDate })
+            } catch {
+                completion([])
+            }
+        }
+    }
+
+    // 보낸 질문
+    func fetchSentQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
+        Task {
+            do {
+                let questions = try await db.collection("questions")
+                    .whereField("userId", isEqualTo: userId)
+                    .getDocuments()
+                
+                var pairs: [(question: ChatBox, answer: ChatBox)] = []
+                
+                for questionDoc in questions.documents {
+                    if let pair = try await fetchQuestionAnswerPair(questionId: questionDoc.documentID) {
+                        pairs.append(pair)
+                    }
+                }
+                
+                completion(pairs.sorted { $0.question.sentDate > $1.question.sentDate })
+            } catch {
+                completion([])
+            }
+        }
+    }
+    
+    // MARK: - 사용자 관련 메서드
+    
+    // 유저 생성할때 데이터 
+    func createLearner(learner: Learner) async throws {
+        let learnerData: [String: Any] = [
+            "name": learner.name,
+            "email": learner.email,
+            "profileImage": learner.profileImage as Any,
+            "category": learner.category,
+            "letterCount": learner.letterCount,
+            "bookmarkedCount": learner.bookmarkedCount,
+            "createdAt": Timestamp(date: learner.createdAt),
+            "lastLoginAt": Timestamp(date: learner.lastLoginAt),
+            "bookmarkedQuestions": learner.bookmarkedQuestions,
+            "sentQuestions": learner.sentQuestions
+        ]
+        
+        try await db.collection("learners").document(learner.id).setData(learnerData)
+    }
+    
+    // 유저 정보 가져오기 
+    func fetchLearner(userId: String) async throws -> Learner? {
+        let document = try await db.collection("learners").document(userId).getDocument()
+        
+        guard let data = document.data() else { return nil }
+        
+        return Learner(
+            id: document.documentID,
+            name: data["name"] as? String ?? "",
+            email: data["email"] as? String ?? "",
+            profileImage: data["profileImage"] as? String,
+            category: data["category"] as? String ?? "",
+            letterCount: data["letterCount"] as? Int ?? 0,
+            bookmarkedCount: data["bookmarkedCount"] as? Int ?? 0,
+            createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
+            lastLoginAt: (data["lastLoginAt"] as? Timestamp)?.dateValue() ?? Date(),
+            bookmarkedQuestions: data["bookmarkedQuestions"] as? [String] ?? [],
+            sentQuestions: data["sentQuestions"] as? [String] ?? []
+        )
+    }
+    
+    
+    // 사용자의 보낸 질문-답변 쌍 가져오기
+   
+    
+    // USER SENT QUESTION 가져오는 함수  ->  learner 컬렉션에서 sentQuestions 필드 값 가져오기  
+    func getSentQuestions(userId: String) async throws -> [String] {
+        let db = Firestore.firestore()
+        let userDoc = try await db.collection("learners").document(userId).getDocument()
+        
+        if let sentQuestions = userDoc.data()?["sentQuestions"] as? [String] {
+            return sentQuestions
+        }
+        return []
     }
 }

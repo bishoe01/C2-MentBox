@@ -83,6 +83,7 @@ struct HomeView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
     
+    
     private func loadData() {
         isLoading = true
         let group = DispatchGroup()
