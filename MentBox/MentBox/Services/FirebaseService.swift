@@ -488,9 +488,30 @@ class FirebaseService {
             "bookmarkedQuestions": FieldValue.arrayUnion([questionId])
         ])
         
+        // 질문과 답변의 북마크 카운트 업데이트
+        let questionRef = db.collection("questions").document(questionId)
+        try await questionRef.updateData([
+            "bookmarkCount": FieldValue.increment(Int64(1))
+        ])
+        
+        // 해당 질문의 답변 찾기
+        let answerQuery = db.collection("answers")
+            .whereField("questionId", isEqualTo: questionId)
+        
+        let answerSnapshot = try await answerQuery.getDocuments()
+        if let answerDoc = answerSnapshot.documents.first {
+            try await answerDoc.reference.updateData([
+                "bookmarkCount": FieldValue.increment(Int64(1))
+            ])
+        }
+        
         // 북마크 추가 알림 (메인 스레드에서)
         await MainActor.run {
-            NotificationCenter.default.post(name: NSNotification.Name("BookmarkChanged"), object: nil)
+            NotificationCenter.default.post(
+                name: NSNotification.Name("BookmarkChanged"),
+                object: nil,
+                userInfo: ["questionId": questionId, "action": "add"]
+            )
         }
     }
     
@@ -514,9 +535,30 @@ class FirebaseService {
             "bookmarkedQuestions": FieldValue.arrayRemove([questionId])
         ])
         
+        // 질문과 답변의 북마크 카운트 업데이트
+        let questionRef = db.collection("questions").document(questionId)
+        try await questionRef.updateData([
+            "bookmarkCount": FieldValue.increment(Int64(-1))
+        ])
+        
+        // 해당 질문의 답변 찾기
+        let answerQuery = db.collection("answers")
+            .whereField("questionId", isEqualTo: questionId)
+        
+        let answerSnapshot = try await answerQuery.getDocuments()
+        if let answerDoc = answerSnapshot.documents.first {
+            try await answerDoc.reference.updateData([
+                "bookmarkCount": FieldValue.increment(Int64(-1))
+            ])
+        }
+        
         // 북마크 제거 알림 (메인 스레드에서)
         await MainActor.run {
-            NotificationCenter.default.post(name: NSNotification.Name("BookmarkChanged"), object: nil)
+            NotificationCenter.default.post(
+                name: NSNotification.Name("BookmarkChanged"),
+                object: nil,
+                userInfo: ["questionId": questionId, "action": "remove"]
+            )
         }
     }
     
