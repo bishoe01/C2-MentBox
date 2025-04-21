@@ -1,23 +1,45 @@
-import SwiftUI
 import AuthenticationServices
 import FirebaseAuth
 import FirebaseCore
 import FirebaseFirestore
-import UserNotifications
 import FirebaseMessaging
+import SwiftUI
+import UserNotifications
 
 struct SignInView: View {
     @State private var isSignedIn = false
     @State private var errorMessage: String?
     @State private var isLoading = false
     @State private var showMainView = false
+    @AppStorage("isLoggedOut") private var isLoggedOut = false
     
     var body: some View {
-        VStack {
-            if isSignedIn {
-                ContentView()
-                    .transition(.opacity)
-            } else {
+        ZStack {
+            Color("SignBG")
+                .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                Spacer()
+                
+                VStack(spacing: 20) {
+                    HStack(spacing: -20) {
+                        Image(systemName: "bubble.left.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(Color("Primary"))
+                            .rotationEffect(.degrees(-5))
+                        
+                        Image(systemName: "bubble.right.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.white.opacity(0.8))
+                            .rotationEffect(.degrees(5))
+                    }
+                    
+                    Text("MentBox")
+                        .menterFont(.logoHeader)
+                }
+                
+                Spacer()
+                
                 if isLoading {
                     ProgressView()
                         .padding()
@@ -40,9 +62,9 @@ struct SignInView: View {
                         }
                     }
                 )
-                .signInWithAppleButtonStyle(.black)
+                .signInWithAppleButtonStyle(.white)
                 .frame(height: 50)
-                .padding()
+                .padding(.horizontal, 40)
                 .disabled(isLoading)
                 
                 if let error = errorMessage {
@@ -50,15 +72,51 @@ struct SignInView: View {
                         .foregroundColor(.red)
                         .padding()
                 }
+                
+                Spacer()
+                    .frame(height: 40)
             }
         }
-        .padding()
+        .onAppear {
+            checkSignInStatus()
+        }
+        .fullScreenCover(isPresented: $showMainView) {
+            ContentView()
+        }
+    }
+    
+    private func checkSignInStatus() {
+        if isLoggedOut {
+            print("❌ 로그아웃 상태")
+            showMainView = false
+            return
+        }
+        
+        if let user = Auth.auth().currentUser {
+            print("✅ 이미 로그인된 사용자: \(user.uid)")
+            showMainView = true
+        } else {
+            print("❌ 로그인된 사용자 없음")
+            showMainView = false
+        }
+    }
+    
+    // 로그아웃 함수 수정
+    static func signOut() {
+        do {
+            try Auth.auth().signOut()
+            UserDefaults.standard.set(true, forKey: "isLoggedOut")
+            print("✅ 로그아웃 성공")
+        } catch {
+            print("❌ 로그아웃 실패: \(error.localizedDescription)")
+        }
     }
     
     private func handleAppleSignIn(result: ASAuthorization) {
         guard let appleIDCredential = result.credential as? ASAuthorizationAppleIDCredential,
               let identityToken = appleIDCredential.identityToken,
-              let tokenString = String(data: identityToken, encoding: .utf8) else {
+              let tokenString = String(data: identityToken, encoding: .utf8)
+        else {
             print("❗️토큰 가져오기 실패")
             errorMessage = "인증 정보를 가져오는데 실패했습니다."
             isLoading = false
@@ -83,8 +141,11 @@ struct SignInView: View {
                     saveUserInfo(user: user, appleIDCredential: appleIDCredential)
                 }
                 
+                // 로그인 성공 시 로그아웃 상태 초기화
+                UserDefaults.standard.set(false, forKey: "isLoggedOut")
+                
                 withAnimation {
-                    isSignedIn = true
+                    showMainView = true
                 }
             }
         }

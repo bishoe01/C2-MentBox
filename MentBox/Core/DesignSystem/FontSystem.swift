@@ -1,6 +1,7 @@
 import SwiftUI
 
 enum MenterFontStyle {
+    case logoHeader
     case header // 24 Bold
     case subtitle // 20 Semibold
     case body // 16 Regular
@@ -11,6 +12,8 @@ enum MenterFontStyle {
 
     var font: Font {
         switch self {
+        case .logoHeader:
+            return .custom("PretendardVariable-Bold", size: 32)
         case .header:
             return .custom("PretendardVariable-Bold", size: 26)
         case .subtitle:
@@ -30,7 +33,7 @@ enum MenterFontStyle {
 
     var color: Color {
         switch self {
-        case .header, .subtitle:
+        case .header, .subtitle, .logoHeader:
             return Color(hex: "#EFEFEA")
         case .body, .caption, .tag, .smallest:
             return Color(hex: "#A5A5A5")

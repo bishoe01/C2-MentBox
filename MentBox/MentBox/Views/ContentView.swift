@@ -12,6 +12,8 @@ struct ContentView: View {
                     .tag(1)
                 MyLetterTabView()
                     .tag(2)
+                ProfileView()
+                    .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea(.all)
@@ -52,6 +54,14 @@ struct CustomTabBar: View {
                         .font(.system(size: 26, weight: .bold))
                 }
                 .foregroundColor(selectedTab == 2 ? Color("Primary") : .white.opacity(0.5))
+            }
+            Spacer()
+            Button(action: { selectedTab = 3 }) {
+                VStack {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 26, weight: .bold))
+                }
+                .foregroundColor(selectedTab == 3 ? Color("Primary") : .white.opacity(0.5))
             }
             Spacer()
         }
@@ -119,6 +129,36 @@ struct MyLetterTabView: View {
                 MyLetterView()
                 Spacer(minLength: 0)
             }
+        }
+    }
+}
+
+struct ProfileView: View {
+    @State private var showSignInView = false
+    
+    var body: some View {
+        BackgroundView {
+            VStack {
+                Spacer()
+                
+                Button(action: {
+                    SignInView.signOut()
+                    showSignInView = true
+                }) {
+                    Text("로그아웃")
+                        .foregroundColor(.red)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+                
+                Spacer()
+            }
+        }
+        .fullScreenCover(isPresented: $showSignInView) {
+            SignInView()
         }
     }
 }

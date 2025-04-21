@@ -105,7 +105,7 @@ struct MentBoxApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SignInView()
                 .ignoresSafeArea(.all)
         }
     }
