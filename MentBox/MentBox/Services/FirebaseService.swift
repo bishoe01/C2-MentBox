@@ -682,9 +682,24 @@ class FirebaseService {
     
     // MARK: - 사용자 관련 메서드
     
+    // 기존 사용자인지 확인
+    func checkExistingUser(userId: String) async throws -> Bool {
+        // learners 컬렉션에서 확인
+        let learnerDoc = try await db.collection("learners").document(userId).getDocument()
+        if learnerDoc.exists {
+            return true
+        }
+        
+        // mentors 컬렉션에서 확인
+        let mentorDoc = try await db.collection("mentors").document(userId).getDocument()
+        return mentorDoc.exists
+    }
+    
     // 유저 생성할때 데이터 
     func createLearner(learner: Learner) async throws {
+        print("🔍 학습자 데이터 저장 시작: \(learner.name)")
         let learnerData: [String: Any] = [
+            "id": learner.id,
             "name": learner.name,
             "email": learner.email,
             "profileImage": learner.profileImage as Any,
@@ -698,6 +713,24 @@ class FirebaseService {
         ]
         
         try await db.collection("learners").document(learner.id).setData(learnerData)
+        print("✅ 학습자 데이터 저장 완료: \(learner.name), 카테고리: \(learner.category)")
+    }
+    
+    // 멘토 생성
+    func createMentor(mentor: Mentor) async throws {
+        print("🔍 멘토 데이터 저장 시작: \(mentor.name)")
+        let mentorData: [String: Any] = [
+            "id": mentor.id,
+            "name": mentor.name,
+            "bio": mentor.bio,
+            "profileImage": mentor.profileImage,
+            "expertise": mentor.expertise,
+            "createdAt": Timestamp(date: Date()),
+            "lastLoginAt": Timestamp(date: Date())
+        ]
+        
+        try await db.collection("mentors").document(mentor.id).setData(mentorData)
+        print("✅ 멘토 데이터 저장 완료: \(mentor.name), 전문분야: \(mentor.expertise)")
     }
     
     // 유저 정보 가져오기 

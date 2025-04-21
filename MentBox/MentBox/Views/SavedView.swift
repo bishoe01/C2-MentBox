@@ -1,5 +1,5 @@
-import SwiftUI
 import FirebaseAuth
+import SwiftUI
 
 struct SavedView: View {
     @State private var selectedCategory: Category = .all
@@ -59,7 +59,7 @@ struct SavedView: View {
 
     private func loadData() {
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("❌ 로그인된 사용자가 없습니다.")
+            print("로그인된 정보가 없습니다")
             Task { @MainActor in
                 isLoading = false
             }
