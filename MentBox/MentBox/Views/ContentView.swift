@@ -5,7 +5,6 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // TabView에서 기본 TabBar 숨기기
             TabView(selection: $selectedTab) {
                 HomeTabView()
                     .tag(0)
@@ -15,10 +14,11 @@ struct ContentView: View {
                     .tag(2)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .ignoresSafeArea()
 
             CustomTabBar(selectedTab: $selectedTab)
         }
-        .ignoresSafeArea(.keyboard)
+        .ignoresSafeArea()
         .preferredColorScheme(.dark)
     }
 }
@@ -57,8 +57,8 @@ struct CustomTabBar: View {
         .frame(height: 70)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-        .padding(.horizontal, 0)
-        .padding(.bottom, 0)
+        .padding(.horizontal)
+        .padding(.bottom, 8)
         .shadow(radius: 10)
     }
 }
@@ -76,9 +76,7 @@ struct BackgroundView<Content: View>: View {
                 .resizable()
                 .ignoresSafeArea()
             content
-                .safeAreaInset(edge: .bottom) {
-                    Color.clear.frame(height: 0)
-                }
+                .padding(.top, 8)
         }
     }
 }
@@ -88,6 +86,7 @@ struct HomeTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 HomeView()
+                    .padding(.top, 8)
                 Spacer(minLength: 0)
             }
         }
@@ -99,6 +98,7 @@ struct StarsTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 MentBoxHeader(title: "STARS")
+                    .padding(.top, 8)
                 SavedView()
                 Spacer(minLength: 0)
             }
@@ -111,6 +111,7 @@ struct MyLetterTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 MentBoxHeader(title: "MYLETTER")
+                    .padding(.top, 8)
                 MyLetterView()
                 Spacer(minLength: 0)
             }

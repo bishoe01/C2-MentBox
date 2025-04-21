@@ -3,6 +3,8 @@ import AuthenticationServices
 import FirebaseAuth
 import FirebaseCore
 import FirebaseFirestore
+import UserNotifications
+import FirebaseMessaging
 
 struct SignInView: View {
     @State private var isSignedIn = false
@@ -89,10 +91,8 @@ struct SignInView: View {
     }
     
     private func saveUserInfo(user: User, appleIDCredential: ASAuthorizationAppleIDCredential) {
-        // Firebase Auth 프로필 업데이트
         let changeRequest = user.createProfileChangeRequest()
         
-        // 이름 설정
         if let fullName = appleIDCredential.fullName {
             let displayName = [fullName.givenName, fullName.familyName]
                 .compactMap { $0 }
@@ -100,7 +100,6 @@ struct SignInView: View {
             changeRequest.displayName = displayName
         }
         
-        // Learner 모델 생성
         let learner = Learner(
             id: user.uid,
             name: changeRequest.displayName ?? "",
@@ -114,8 +113,7 @@ struct SignInView: View {
             bookmarkedQuestions: [],
             sentQuestions: []
         )
-        
-        // Firestore에 사용자 정보 저장
+    
         Task {
             do {
                 try await FirebaseService.shared.createLearner(learner: learner)

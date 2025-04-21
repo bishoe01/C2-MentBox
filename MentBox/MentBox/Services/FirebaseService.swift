@@ -10,22 +10,19 @@ class FirebaseService {
     
     private init() {}
     
-    // MARK: - 데이터 초기화 및 재업로드
 
     func resetAndUploadData() async throws {
         print("데이터 초기화 시작")
         
-        // 기존 데이터 삭제 (learners는 제외)
         try await deleteCollection("mentors")
         try await deleteCollection("questions")
         try await deleteCollection("answers")
         try await deleteCollection("bookmarks")
         
-        // UserDefaults 초기화
         UserDefaults.standard.removeObject(forKey: "lastQuestionDate")
         UserDefaults.standard.removeObject(forKey: "lastQuestionId")
         
-        // 새로운 데이터 업로드
+
         try await uploadMockData()
         
         print("✅ 데이터 초기화 완료")
@@ -43,7 +40,6 @@ class FirebaseService {
         print("✅ \(collection) 삭제 완료")
     }
     
-    // MARK: userDefaults 초기화
 
     func resetMockDataUploaded() {
         self.defaults.removeObject(forKey: self.mockDataUploadedKey)
@@ -491,6 +487,11 @@ class FirebaseService {
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayUnion([questionId])
         ])
+        
+        // 북마크 추가 알림 (메인 스레드에서)
+        await MainActor.run {
+            NotificationCenter.default.post(name: NSNotification.Name("BookmarkChanged"), object: nil)
+        }
     }
     
     // 북마크 제거
@@ -512,6 +513,11 @@ class FirebaseService {
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayRemove([questionId])
         ])
+        
+        // 북마크 제거 알림 (메인 스레드에서)
+        await MainActor.run {
+            NotificationCenter.default.post(name: NSNotification.Name("BookmarkChanged"), object: nil)
+        }
     }
     
     // USER BOOK MARK 가져오는 함수  ->  learner 컬렉션에서 bookmarkedQuestions 필드 값 가져오기  
@@ -589,18 +595,39 @@ class FirebaseService {
     }
 
     // 보낸 질문
-    func fetchSentQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
+    func fetchSentQuestionAnswerPairs(userId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox?)]) -> Void) {
         Task {
             do {
                 let questions = try await db.collection("questions")
                     .whereField("userId", isEqualTo: userId)
                     .getDocuments()
                 
-                var pairs: [(question: ChatBox, answer: ChatBox)] = []
+                var pairs: [(question: ChatBox, answer: ChatBox?)] = []
                 
                 for questionDoc in questions.documents {
-                    if let pair = try await fetchQuestionAnswerPair(questionId: questionDoc.documentID) {
-                        pairs.append(pair)
+                    let questionData = questionDoc.data()
+                    let question = ChatBox(
+                        id: questionDoc.documentID,
+                        messageType: .question,
+                        userId: questionData["userId"] as? String ?? "",
+                        senderName: questionData["senderName"] as? String ?? "",
+                        content: questionData["content"] as? String ?? "",
+                        sentDate: (questionData["sentDate"] as? Timestamp)?.dateValue() ?? Date(),
+                        isFromMe: true,
+                        mentorId: questionData["mentorId"] as? String ?? "",
+                        bookmarkCount: questionData["bookmarkCount"] as? Int ?? 0,
+                        questionId: nil,
+                        status: questionData["status"] as? String
+                    )
+                    
+                    // 답변된 질문인 경우에만 답변을 가져옴
+                    if question.status == "answered" {
+                        if let pair = try await fetchQuestionAnswerPair(questionId: questionDoc.documentID) {
+                            pairs.append((question: pair.question, answer: pair.answer))
+                        }
+                    } else {
+                        // 답변 대기 중인 질문은 answer를 nil로 설정
+                        pairs.append((question: question, answer: nil))
                     }
                 }
                 
@@ -653,9 +680,6 @@ class FirebaseService {
     }
     
     
-    // 사용자의 보낸 질문-답변 쌍 가져오기
-   
-    
     // USER SENT QUESTION 가져오는 함수  ->  learner 컬렉션에서 sentQuestions 필드 값 가져오기  
     func getSentQuestions(userId: String) async throws -> [String] {
         let db = Firestore.firestore()
@@ -665,5 +689,70 @@ class FirebaseService {
             return sentQuestions
         }
         return []
+    }
+
+    // 답변 대기 중인 질문 가져오기
+    func fetchPendingQuestions(userId: String, completion: @escaping ([(question: ChatBox, mentor: Mentor)]) -> Void) {
+        Task {
+            do {
+                let questions = try await db.collection("questions")
+                    .whereField("userId", isEqualTo: userId)
+                    .whereField("status", isEqualTo: "pending")
+                    .getDocuments()
+                
+                var pendingQuestions: [(question: ChatBox, mentor: Mentor)] = []
+                
+                for questionDoc in questions.documents {
+                    let questionData = questionDoc.data()
+                    let question = ChatBox(
+                        id: questionDoc.documentID,
+                        messageType: .question,
+                        userId: questionData["userId"] as? String ?? "",
+                        senderName: questionData["senderName"] as? String ?? "",
+                        content: questionData["content"] as? String ?? "",
+                        sentDate: (questionData["sentDate"] as? Timestamp)?.dateValue() ?? Date(),
+                        isFromMe: true,
+                        mentorId: questionData["mentorId"] as? String ?? "",
+                        bookmarkCount: questionData["bookmarkCount"] as? Int ?? 0,
+                        questionId: nil,
+                        status: questionData["status"] as? String
+                    )
+                    
+                    // 멘토 정보 가져오기
+                    if let mentorDoc = try? await db.collection("mentors").document(question.mentorId).getDocument(),
+                       let mentorData = mentorDoc.data() {
+                        let mentor = Mentor(
+                            id: mentorDoc.documentID,
+                            name: mentorData["name"] as? String ?? "",
+                            bio: mentorData["bio"] as? String ?? "",
+                            profileImage: mentorData["profileImage"] as? String ?? "",
+                            expertise: mentorData["expertise"] as? String ?? ""
+                        )
+                        pendingQuestions.append((question: question, mentor: mentor))
+                    }
+                }
+                
+                completion(pendingQuestions.sorted { $0.question.sentDate > $1.question.sentDate })
+            } catch {
+                print("❌ 답변 대기 중인 질문 가져오기 실패: \(error)")
+                completion([])
+            }
+        }
+    }
+
+    // 답변 대기 중인 질문 삭제
+    func deletePendingQuestion(questionId: String, userId: String) async throws {
+        let db = Firestore.firestore()
+        
+        // questions 컬렉션에서 질문 삭제
+        try await db.collection("questions").document(questionId).delete()
+        
+        // learner 컬렉션의 sentQuestions 필드에서 questionId 제거
+        let userRef = db.collection("learners").document(userId)
+        try await userRef.updateData([
+            "sentQuestions": FieldValue.arrayRemove([questionId])
+        ])
+        
+        print("✅ 답변 대기 중인 질문 삭제 완료: \(questionId)")
     }
 }

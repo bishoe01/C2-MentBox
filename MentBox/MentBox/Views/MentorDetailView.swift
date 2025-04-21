@@ -6,10 +6,13 @@ struct MentorDetailView: View {
     let mentor: Mentor
     @Environment(\.presentationMode) private var presentationMode
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
+    @State private var pendingQuestions: [(question: ChatBox, mentor: Mentor)] = []
     @State private var questionText: String = ""
     @State private var isSubmitting: Bool = false
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
+    @State private var showDeleteAlert = false
+    @State private var selectedQuestionId: String = ""
     
     var body: some View {
         ZStack {
@@ -84,6 +87,56 @@ struct MentorDetailView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal)
+                        
+                        // 답변 대기 중인 질문 섹션
+                        if !pendingQuestions.isEmpty {
+                            VStack(alignment: .leading, spacing: 20) {
+                                Text("답변 대기 중인 질문")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal)
+                                
+                                VStack(spacing: 20) {
+                                    ForEach(pendingQuestions.indices, id: \.self) { index in
+                                        let pair = pendingQuestions[index]
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            HStack {
+                                                Image(pair.mentor.profileImage)
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 30, height: 30)
+                                                    .clipShape(Circle())
+                                                
+                                                VStack(alignment: .leading) {
+                                                    Text(pair.mentor.name)
+                                                        .font(.subheadline)
+                                                        .fontWeight(.bold)
+                                                        .foregroundColor(.white)
+                                                    Text(pair.mentor.expertise)
+                                                        .font(.caption)
+                                                        .foregroundColor(.yellow)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Button(action: {
+                                                    selectedQuestionId = pair.question.id
+                                                    showDeleteAlert = true
+                                                }) {
+                                                    Image(systemName: "trash")
+                                                        .foregroundColor(.red)
+                                                        .padding(8)
+                                                }
+                                            }
+                                            
+                                            ChatCardView(question: pair.question, answer: nil)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
                         
                         // 멘토가 답변한 사연들
                         VStack(alignment: .leading, spacing: 20) {
@@ -168,6 +221,14 @@ struct MentorDetailView: View {
                 message: Text(alertMessage),
                 dismissButton: .default(Text("확인"))
             )
+        }
+        .alert("질문 삭제", isPresented: $showDeleteAlert) {
+            Button("취소", role: .cancel) { }
+            Button("삭제", role: .destructive) {
+                deleteQuestion()
+            }
+        } message: {
+            Text("이 질문을 삭제하시겠습니까?")
         }
     }
     
@@ -256,6 +317,8 @@ struct MentorDetailView: View {
                         self.alertMessage = "편지가 성공적으로 전송되었습니다. 답변을 기다려주세요."
                         self.showAlert = true
                         self.questionText = ""
+                        // 질문 전송 후 데이터 새로고침
+                        self.loadChatPairs()
                     }
                     self.isSubmitting = false
                 }
@@ -268,6 +331,38 @@ struct MentorDetailView: View {
         FirebaseService.shared.fetchQuestionAnswerPairs(for: mentor.id) { pairs in
             print("✅ MentorDetailView - 데이터 로드 완료 - pairs 개수: \(pairs.count)")
             self.chatPairs = pairs
+        }
+        
+        // 답변 대기 중인 질문 로드
+        if let userId = Auth.auth().currentUser?.uid {
+            FirebaseService.shared.fetchPendingQuestions(userId: userId) { pendingPairs in
+                self.pendingQuestions = pendingPairs.filter { $0.question.mentorId == mentor.id }
+            }
+        }
+    }
+    
+    private func deleteQuestion() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            alertMessage = "로그인이 필요합니다."
+            showAlert = true
+            return
+        }
+        
+        Task {
+            do {
+                try await FirebaseService.shared.deletePendingQuestion(questionId: selectedQuestionId, userId: userId)
+                // 삭제 후 데이터 다시 로드
+                await MainActor.run {
+                    loadChatPairs()
+                    alertMessage = "질문이 삭제되었습니다."
+                    showAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    alertMessage = "질문 삭제에 실패했습니다."
+                    showAlert = true
+                }
+            }
         }
     }
 }

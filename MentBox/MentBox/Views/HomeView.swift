@@ -63,6 +63,9 @@ struct HomeView: View {
             .onAppear {
                 loadData()
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("BookmarkChanged"))) { _ in
+                loadData()
+            }
             .background(
                 NavigationLink(
                     destination: Group {
@@ -90,18 +93,24 @@ struct HomeView: View {
         
         group.enter()
         FirebaseService.shared.fetchMentors { fetchedMentors in
-            self.mentors = fetchedMentors
-            group.leave()
+            Task { @MainActor in
+                self.mentors = fetchedMentors
+                group.leave()
+            }
         }
         
         group.enter()
         FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
-            self.chatPairs = pairs
-            group.leave()
+            Task { @MainActor in
+                self.chatPairs = pairs
+                group.leave()
+            }
         }
         
         group.notify(queue: .main) {
-            isLoading = false
+            Task { @MainActor in
+                isLoading = false
+            }
         }
     }
 }

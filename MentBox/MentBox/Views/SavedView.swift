@@ -52,12 +52,17 @@ struct SavedView: View {
         .onAppear {
             loadData()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("BookmarkChanged"))) { _ in
+            loadData()
+        }
     }
 
     private func loadData() {
         guard let userId = Auth.auth().currentUser?.uid else {
             print("❌ 로그인된 사용자가 없습니다.")
-            isLoading = false
+            Task { @MainActor in
+                isLoading = false
+            }
             return
         }
 
@@ -65,18 +70,24 @@ struct SavedView: View {
 
         group.enter()
         FirebaseService.shared.fetchMentors { fetchedMentors in
-            self.mentors = fetchedMentors
-            group.leave()
+            Task { @MainActor in
+                self.mentors = fetchedMentors
+                group.leave()
+            }
         }
 
         group.enter()
         FirebaseService.shared.fetchBookmarkedQuestionAnswerPairs(userId: userId) { pairs in
-            self.chatPairs = pairs
-            group.leave()
+            Task { @MainActor in
+                self.chatPairs = pairs
+                group.leave()
+            }
         }
 
         group.notify(queue: .main) {
-            isLoading = false
+            Task { @MainActor in
+                isLoading = false
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ import FirebaseAuth
 
 struct ChatCardView: View {
     let question: ChatBox
-    let answer: ChatBox
+    let answer: ChatBox?
     @State private var isPressed = false
     @State private var mentor: Mentor? = nil
     @State private var isBookmarked = false
@@ -50,76 +50,100 @@ struct ChatCardView: View {
                     )
                 )
                 
-                // 멘토 답변이 담길 부분인데, 따로 분리해줄필요 있나 ? 
-                VStack(alignment: .leading, spacing: 16) {
-                    
-                    HStack(spacing: 12) {
-                        if let mentor = mentor {
-                            Image(mentor.profileImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                )
-                            
-                            // name 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(mentor.name)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.white)
+                if let answer = answer {
+                    // 멘토 답변이 담길 부분인데, 따로 분리해줄필요 있나 ? 
+                    VStack(alignment: .leading, spacing: 16) {
+                        
+                        HStack(spacing: 12) {
+                            if let mentor = mentor {
+                                Image(mentor.profileImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
                                 
-                                Text(mentor.expertise)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.yellow)
-                            }
-                            
-                            Spacer()
-                            
-                            HStack(spacing: 4) {
-                                Button(action: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                                        // MARK : 북마크 토클 함수 
-                                        toggleBookmark()
-                                    }
-                                }) {
-                                    Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                // name 
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(mentor.name)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    
+                                    Text(mentor.expertise)
                                         .font(.system(size: 12))
-                                        .foregroundColor(isBookmarked ? .yellow : .yellow.opacity(0.8))
-                                        .scaleEffect(showBookmarkAnimation ? 1.2 : 1.0)
+                                        .foregroundColor(.yellow)
                                 }
                                 
-                                if answer.bookmarkCount > 0 {
-                                    Text("\(answer.bookmarkCount)")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.yellow.opacity(0.8))
+                                Spacer()
+                                
+                                HStack(spacing: 4) {
+                                    Button(action: {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                            // MARK : 북마크 토클 함수 
+                                            toggleBookmark()
+                                        }
+                                    }) {
+                                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(isBookmarked ? .yellow : .yellow.opacity(0.8))
+                                            .scaleEffect(showBookmarkAnimation ? 1.2 : 1.0)
+                                    }
+                                    
+                                    if answer.bookmarkCount > 0 {
+                                        Text("\(answer.bookmarkCount)")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.yellow.opacity(0.8))
+                                    }
                                 }
                             }
                         }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
-                    
-                    Text(answer.content)
-                        .font(.system(size: 15))
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineSpacing(4)
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color("btn_dark").opacity(0.95),
-                            Color("btn_light").opacity(0.95)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
+                        .padding(.top, 12)
+                        
+                        Text(answer.content)
+                            .font(.system(size: 15))
+                            .foregroundColor(.white.opacity(0.9))
+                            .lineSpacing(4)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 16)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color("btn_dark").opacity(0.95),
+                                Color("btn_light").opacity(0.95)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                } else {
+                    // 답변이 없는 경우의 UI
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Spacer()
+                            Text("답변 대기 중...")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.7))
+                                .padding(.vertical, 12)
+                            Spacer()
+                        }
+                    }
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color("btn_dark").opacity(0.95),
+                                Color("btn_light").opacity(0.95)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
@@ -140,14 +164,16 @@ struct ChatCardView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .onAppear {
-            fetchMentor()
+            if let answer = answer {
+                fetchMentor()
+            }
             checkBookmarkStatus()
         }
     }
     
     private func fetchMentor() {
         FirebaseService.shared.fetchMentors { mentors in
-            self.mentor = mentors.first { $0.id == answer.mentorId }
+            self.mentor = mentors.first { $0.id == answer?.mentorId }
         }
     }
     
@@ -233,7 +259,11 @@ struct ChatCardView: View {
     
     ZStack {
         Color.black.edgesIgnoringSafeArea(.all)
-        ChatCardView(question: previewQuestion, answer: previewAnswer)
-            .padding()
+        VStack {
+            ChatCardView(question: previewQuestion, answer: previewAnswer)
+                .padding()
+            ChatCardView(question: previewQuestion, answer: nil)
+                .padding()
+        }
     }
 }
