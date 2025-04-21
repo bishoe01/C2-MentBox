@@ -21,10 +21,10 @@ struct ChatBox: Identifiable {
     let sentDate: Date
     let isFromMe: Bool 
     let mentorId: String 
-    let bookmarkCount: Int 
+    var bookmarkCount: Int
     
     var questionId: String? 
-    var status: String? 
+    let status: String? 
 }
 
 struct Mentor: Identifiable {

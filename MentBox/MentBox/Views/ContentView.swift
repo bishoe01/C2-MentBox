@@ -14,12 +14,13 @@ struct ContentView: View {
                     .tag(2)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .ignoresSafeArea()
+            .ignoresSafeArea(.all)
 
             CustomTabBar(selectedTab: $selectedTab)
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(.all)
         .preferredColorScheme(.dark)
+        .statusBar(hidden: true)
     }
 }
 
@@ -57,9 +58,10 @@ struct CustomTabBar: View {
         .frame(height: 70)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-        .padding(.horizontal)
+        .padding(.horizontal, 0)
         .padding(.bottom, 8)
         .shadow(radius: 10)
+        .ignoresSafeArea(.all)
     }
 }
 
@@ -74,10 +76,12 @@ struct BackgroundView<Content: View>: View {
         ZStack {
             Image("BG")
                 .resizable()
-                .ignoresSafeArea()
+                .ignoresSafeArea(.all)
             content
-                .padding(.top, 8)
+                .padding(.top, 44)
         }
+        .statusBar(hidden: true)
+        .ignoresSafeArea(.all)
     }
 }
 
@@ -86,7 +90,7 @@ struct HomeTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 HomeView()
-                    .padding(.top, 8)
+                    .padding(.top, 44)
                 Spacer(minLength: 0)
             }
         }
@@ -98,7 +102,7 @@ struct StarsTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 MentBoxHeader(title: "STARS")
-                    .padding(.top, 8)
+                    .padding(.top, 44)
                 SavedView()
                 Spacer(minLength: 0)
             }
@@ -111,7 +115,7 @@ struct MyLetterTabView: View {
         BackgroundView {
             VStack(spacing: 0) {
                 MentBoxHeader(title: "MYLETTER")
-                    .padding(.top, 8)
+                    .padding(.top, 44)
                 MyLetterView()
                 Spacer(minLength: 0)
             }

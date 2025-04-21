@@ -90,11 +90,23 @@ extension AppDelegate: MessagingDelegate {
 struct MentBoxApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
+    init() {
+        // safeArea 무시를 위한 설정
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            if let window = windowScene.windows.first {
+                window.overrideUserInterfaceStyle = .dark
+                // safeArea 무시를 위한 추가 설정
+                let controller = UIHostingController(rootView: AnyView(EmptyView()))
+                controller.view.backgroundColor = .clear
+                window.rootViewController = controller
+            }
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                SignInView()
-            }
+            ContentView()
+                .ignoresSafeArea(.all)
         }
     }
 }
