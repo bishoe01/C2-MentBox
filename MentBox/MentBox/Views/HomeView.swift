@@ -5,7 +5,7 @@ struct HomeView: View {
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
     @State private var selectedMentor: Mentor? = nil
-    
+
     var body: some View {
         ZStack {
             Image("BG")
@@ -26,7 +26,7 @@ struct HomeView: View {
 
                         VStack {
                             HStack {
-                                Text("공감 받은 사연")
+                                Text("사연 BEST 3")
                                     .menterFont(.header)
                                 Spacer()
                             }
@@ -65,7 +65,8 @@ struct HomeView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("BookmarkChanged"))) { notification in
             if let userInfo = notification.userInfo,
                let questionId = userInfo["questionId"] as? String,
-               let action = userInfo["action"] as? String {
+               let action = userInfo["action"] as? String
+            {
                 // 북마크 변경된 질문만 업데이트
                 updateBookmarkCount(for: questionId, action: action)
             }
@@ -87,7 +88,7 @@ struct HomeView: View {
             }
         )
     }
-    
+
     private func updateBookmarkCount(for questionId: String, action: String) {
         if let index = chatPairs.firstIndex(where: { $0.question.id == questionId }) {
             var updatedPair = chatPairs[index]
@@ -101,11 +102,11 @@ struct HomeView: View {
             chatPairs[index] = updatedPair
         }
     }
-    
+
     private func loadData() {
         isLoading = true
         let group = DispatchGroup()
-        
+
         group.enter()
         FirebaseService.shared.fetchMentors { fetchedMentors in
             Task { @MainActor in
@@ -113,7 +114,7 @@ struct HomeView: View {
                 group.leave()
             }
         }
-        
+
         group.enter()
         FirebaseService.shared.fetchAllQuestionAnswerPairs { pairs in
             Task { @MainActor in
@@ -121,7 +122,7 @@ struct HomeView: View {
                 group.leave()
             }
         }
-        
+
         group.notify(queue: .main) {
             Task { @MainActor in
                 isLoading = false

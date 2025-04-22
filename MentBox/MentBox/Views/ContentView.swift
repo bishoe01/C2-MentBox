@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 import SwiftUI
 
 struct ContentView: View {
@@ -134,11 +136,63 @@ struct MyLetterTabView: View {
 }
 
 struct ProfileTabView: View {
+    @State private var userType: UserType?
+    @State private var isLoading = true
+
     var body: some View {
         BackgroundView {
-            VStack(spacing: 0) {
-                ProfileContentView()
-                Spacer(minLength: 0)
+            if isLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if userType == .learner {
+                            LearnerProfileView()
+                        } else if userType == .mentor {
+                            MentorProfileView()
+                        } else {
+                            ProfileContentView()
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            loadUserType()
+        }
+    }
+
+    private func loadUserType() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            isLoading = false
+            return
+        }
+
+        Task {
+            do {
+                if let _ = try await FirebaseService.shared.fetchLearner(userId: userId) {
+                    await MainActor.run {
+                        self.userType = .learner
+                        self.isLoading = false
+                    }
+                } else {
+                    let mentorDoc = try await Firestore.firestore().collection("mentors").document(userId).getDocument()
+                    if mentorDoc.exists {
+                        await MainActor.run {
+                            self.userType = .mentor
+                            self.isLoading = false
+                        }
+                    } else {
+                        await MainActor.run {
+                            self.isLoading = false
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoading = false
+                }
             }
         }
     }

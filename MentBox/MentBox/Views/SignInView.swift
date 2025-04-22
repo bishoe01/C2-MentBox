@@ -15,9 +15,9 @@ struct SignInView: View {
     @State private var isSignedIn = false
     @State private var errorMessage: String?
     @State private var isLoading = false
-    @State private var showMainView = false
     @State private var showUserTypeSelection = false
     @State private var selectedUserType: UserType?
+    @State private var currentUserType: UserType?
     
     @AppStorage("isLoggedOut") private var isLoggedOut = false
     
@@ -91,45 +91,63 @@ struct SignInView: View {
             }
         }
         .onAppear {
-            checkSignInStatus()
+            if !isLoggedOut {
+                checkUserType()
+            }
         }
-        .fullScreenCover(isPresented: $showMainView) {
-            ContentView()
+        .fullScreenCover(item: $currentUserType) { userType in
+            switch userType {
+            case .learner:
+                LearnerMainView()
+            case .mentor:
+                MentorMainView()
+            }
         }
     }
     
     private func handleUserTypeSelection(userType: UserType) {
-        // 신규 사용자 정보 입력이 끝났으므로 메인 화면으로 이동
+        currentUserType = userType
         UserDefaults.standard.set(false, forKey: "isLoggedOut")
         withAnimation {
-            showUserTypeSelection = false // 회원‑유형 선택 시트 닫기
-            showMainView = true // ContentView로 전환
+            showUserTypeSelection = false
         }
     }
     
-    private func checkSignInStatus() {
-        if isLoggedOut {
-            print("로그아웃 상태")
-            showMainView = false
-            return
-        }
+    private func checkUserType() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         
-        if let user = Auth.auth().currentUser {
-            print("이미 로그인된 사용자: \(user.uid)")
-            showMainView = true
-        } else {
-            print(" 로그인된 사용자 없음")
-            showMainView = false
-        }
-    }
-    
-    static func signOut() {
-        do {
-            try Auth.auth().signOut()
-            UserDefaults.standard.set(true, forKey: "isLoggedOut")
-            print("로그아웃 성공")
-        } catch {
-            print("로그아웃 실패: \(error.localizedDescription)")
+        isLoading = true
+        
+        Task {
+            do {
+                // 먼저 Learner로 시도
+                if let _ = try await FirebaseService.shared.fetchLearner(userId: userId) {
+                    await MainActor.run {
+                        currentUserType = .learner
+                        isLoading = false
+                    }
+                    return
+                }
+                
+                // Learner가 아니면 Mentor로 시도
+                let mentorDoc = try await Firestore.firestore().collection("mentors").document(userId).getDocument()
+                if mentorDoc.exists {
+                    await MainActor.run {
+                        currentUserType = .mentor
+                        isLoading = false
+                    }
+                } else {
+                    await MainActor.run {
+                        isLoading = false
+                        showUserTypeSelection = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    print(" 사용자 타입 확인 실패: \(error)")
+                    isLoading = false
+                }
+            }
         }
     }
     
@@ -159,27 +177,41 @@ struct SignInView: View {
                 print("로그인 성공 -> 사용자 이름 :  \(authResult?.user.uid ?? "없음")")
                 
                 if let user = authResult?.user {
-                    // 기존 사용자인지 볼거야  -> 아니면 이제 실패
                     Task {
                         do {
                             let isExistingUser = try await FirebaseService.shared.checkExistingUser(userId: user.uid)
                             if isExistingUser {
-                                // 기존 사용자인 경우 바로 메인 화면으로
-                                UserDefaults.standard.set(false, forKey: "isLoggedOut")
-                                withAnimation {
-                                    showMainView = true
+                                // 기존 사용자인 경우 사용자 타입 확인
+                                await MainActor.run {
+                                    isLoading = true
                                 }
+                                checkUserType()
                             } else {
                                 // 신규 사용자인 경우 사용자 유형 선택 화면 표시
-                                showUserTypeSelection = true
+                                await MainActor.run {
+                                    isLoading = false
+                                    showUserTypeSelection = true
+                                }
                             }
                         } catch {
-                            errorMessage = "사용자 로그인 / 확인 실패했습니다."
-                            isLoading = false
+                            await MainActor.run {
+                                errorMessage = "사용자 로그인 / 확인 실패했습니다."
+                                isLoading = false
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+    
+    static func signOut() {
+        do {
+            try Auth.auth().signOut()
+            UserDefaults.standard.set(true, forKey: "isLoggedOut")
+            print("로그아웃 성공")
+        } catch {
+            print("로그아웃 실패: \(error.localizedDescription)")
         }
     }
 }
@@ -317,13 +349,19 @@ struct UserInfoInputView: View {
                     print(" 멘토 정보 저장 완료: \(name), \(expertise), \(bio)")
                 }
                 
-                UserDefaults.standard.set(false, forKey: "isLoggedOut")
-                onComplete()
+                await MainActor.run {
+                    UserDefaults.standard.set(false, forKey: "isLoggedOut")
+                    isLoading = false
+                    dismiss()
+                    onComplete()
+                }
             } catch {
-                print(" 사용자 정보 저장 실패: \(error.localizedDescription)")
-                errorMessage = "사용자 정보 저장에 실패했습니다."
+                await MainActor.run {
+                    print(" 사용자 정보 저장 실패: \(error.localizedDescription)")
+                    errorMessage = "사용자 정보 저장에 실패했습니다."
+                    isLoading = false
+                }
             }
-            isLoading = false
         }
     }
 }
@@ -404,4 +442,8 @@ struct UserTypeSelectionView: View {
 
 #Preview {
     SignInView()
+}
+
+extension UserType: Identifiable {
+    var id: Int { hashValue }
 }

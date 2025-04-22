@@ -4,14 +4,14 @@ struct MentorsSection: View {
     @State private var selectedCategory: Category = .all
     let mentors: [Mentor]
     @Binding var selectedMentor: Mentor?
-    
+
     var filteredMentors: [Mentor] {
         if selectedCategory == .all {
             return mentors
         }
         return mentors.filter { $0.expertise.lowercased() == selectedCategory.rawValue.lowercased() }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             CategoryToggleView(
@@ -20,7 +20,7 @@ struct MentorsSection: View {
                 onSeeAll: {},
                 showSeeAll: false
             )
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(filteredMentors) { mentor in
@@ -31,7 +31,6 @@ struct MentorsSection: View {
                         }
                     }
                 }
-                .padding(.horizontal)
             }
         }
     }
