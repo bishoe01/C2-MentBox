@@ -17,17 +17,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             options: authOptions,
             completionHandler: { granted, error in
                 if let error = error {
-                    print("❌ 푸시 알림 권한 요청 실패: \(error.localizedDescription)")
+                    print(" 푸시 알림 권한 요청 실패: \(error.localizedDescription)")
                     return
                 }
                 
                 if granted {
-                    print("✅ 푸시 알림 권한 허용됨")
+                    print(" 푸시 알림 허용 ! ")
                     DispatchQueue.main.async {
                         application.registerForRemoteNotifications()
                     }
                 } else {
-                    print("⚠️ 푸시 알림 권한 거부됨")
+                    print("⚠️ 푸시 알림 거절 ! ")
                 }
             }
         )
@@ -41,30 +41,36 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         //         print("🔥 Firebase 데이터 초기화 확인 중...")
         //         try await FirebaseService.shared.resetAndUploadData()
         //     } catch {
-        //         print("❌ Firebase 데이터 초기화 실패: \(error)")
+        //         print(" Firebase 데이터 초기화 실패: \(error)")
         //     }
         // }
         
         return true
     }
     
-    func application(_ application: UIApplication,
-                    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
         Messaging.messaging().apnsToken = deviceToken
     }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                              willPresent notification: UNNotification,
-                              withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
         // 앱이 포그라운드에 있을 때 알림 표시
         completionHandler([.banner, .sound, .badge])
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                              didReceive response: UNNotificationResponse,
-                              withCompletionHandler completionHandler: @escaping () -> Void) {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
         // 사용자가 알림을 탭했을 때 처리
         let userInfo = response.notification.request.content.userInfo
         print("알림 탭됨: \(userInfo)")
@@ -78,9 +84,11 @@ extension AppDelegate: MessagingDelegate {
     }
     
     // 백그라운드에서 알림을 받았을 때 호출
-    func application(_ application: UIApplication,
-                    didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
         print("백그라운드 알림 수신: \(userInfo)")
         completionHandler(.newData)
     }
@@ -91,14 +99,10 @@ struct MentBoxApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     init() {
-        // safeArea 무시를 위한 설정
+        // 다크 모드 강제 설정
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             if let window = windowScene.windows.first {
                 window.overrideUserInterfaceStyle = .dark
-                // safeArea 무시를 위한 추가 설정
-                let controller = UIHostingController(rootView: AnyView(EmptyView()))
-                controller.view.backgroundColor = .clear
-                window.rootViewController = controller
             }
         }
     }

@@ -25,7 +25,7 @@ class FirebaseService {
 
         try await uploadMockData()
         
-        print("✅ 데이터 초기화 완료")
+        print(" 데이터 초기화 완료")
     }
     
     private func deleteCollection(_ collection: String) async throws {
@@ -37,13 +37,13 @@ class FirebaseService {
         }
         
         try await batch.commit()
-        print("✅ \(collection) 삭제 완료")
+        print(" \(collection) 삭제 완료")
     }
     
 
     func resetMockDataUploaded() {
         self.defaults.removeObject(forKey: self.mockDataUploadedKey)
-        print("✅ mockDataUploadedKey 초기화 완료")
+        print(" mockDataUploadedKey 초기화 완료")
     }
     
     func uploadMockData() async throws {
@@ -58,7 +58,7 @@ class FirebaseService {
             ]
             
             try await db.collection("mentors").document(mentor.id).setData(mentorData)
-            print("✅ 멘토 데이터 업로드 성공: \(mentor.name)")
+            print(" 멘토 데이터 업로드 성공: \(mentor.name)")
         }
         
         // 질문과 답변 데이터 업로드
@@ -75,7 +75,7 @@ class FirebaseService {
             ]
             
             try await db.collection("questions").document(pair.question.id).setData(questionData)
-            print("✅ 질문 데이터 업로드 성공: \(pair.question.id)")
+            print(" 질문 데이터 업로드 성공: \(pair.question.id)")
             
             // 답변 업로드
             let answerData: [String: Any] = [
@@ -90,7 +90,7 @@ class FirebaseService {
             ]
             
             try await db.collection("answers").document(pair.answer.id).setData(answerData)
-            print("✅ 답변 데이터 업로드 성공: \(pair.answer.id)")
+            print(" 답변 데이터 업로드 성공: \(pair.answer.id)")
         }
         
         // 현재 사용자의 Learner 데이터 업로드
@@ -109,16 +109,16 @@ class FirebaseService {
         ]
         
         try await db.collection("learners").document(learner.id).setData(learnerData)
-        print("✅ 사용자 데이터 업로드 성공: \(learner.name)")
+        print(" 사용자 데이터 업로드 성공: \(learner.name)")
         
-        print("✅ 모든 더미 데이터 업로드 완료")
+        print(" 모든 더미 데이터 업로드 완료")
     }
     
     // 멘토들 목록 가져옴
     func fetchMentors(completion: @escaping ([Mentor]) -> Void) {
         self.db.collection("mentors").getDocuments { snapshot, error in
             if let error = error {
-                print("❌ 멘토 데이터 가져오기 실패: \(error)")
+                print(" 멘토 데이터 가져오기 실패: \(error)")
                 completion([])
                 return
             }
@@ -152,7 +152,7 @@ class FirebaseService {
         // 멘토정보 먼저 가져오기
         self.db.collection("mentors").document(mentorId).getDocument { mentorDoc, error in
             if let error = error {
-                print("❌ 멘토 데이터 가져오기 실패: \(error)")
+                print(" 멘토 데이터 가져오기 실패: \(error)")
                 completion([])
                 return
             }
@@ -163,7 +163,7 @@ class FirebaseService {
                 return
             }
             
-            print("✅ 멘토 데이터 가져오기 성공: \(mentorData)")
+            print(" 멘토 데이터 가져오기 성공: \(mentorData)")
             
             let mentor = Mentor(
                 id: mentorId,
@@ -179,7 +179,7 @@ class FirebaseService {
                 .whereField("status", isEqualTo: "answered")
                 .getDocuments { questionSnapshot, error in
                     if let error = error {
-                        print("❌ 질문 데이터 가져오기 실패: \(error)")
+                        print(" 질문 데이터 가져오기 실패: \(error)")
                         completion([])
                         return
                     }
@@ -222,7 +222,7 @@ class FirebaseService {
                                 defer { group.leave() }
                                 
                                 if let error = error {
-                                    print("❌ 답변 데이터 가져오기 실패: \(error)")
+                                    print(" 답변 데이터 가져오기 실패: \(error)")
                                     return
                                 }
                                 
@@ -277,7 +277,7 @@ class FirebaseService {
             .whereField("status", isEqualTo: "answered")
             .getDocuments { questionSnapshot, error in
                 if let error = error {
-                    print("❌ 질문 데이터 가져오기 실패: \(error)")
+                    print(" 질문 데이터 가져오기 실패: \(error)")
                     completion([])
                     return
                 }
@@ -288,7 +288,7 @@ class FirebaseService {
                     return
                 }
                 
-                print("✅ 질문 데이터 가져오기 성공: \(questions.count)개")
+                print(" 질문 데이터 가져오기 성공: \(questions.count)개")
                 
                 for questionDoc in questions {
                     let questionData = questionDoc.data()
@@ -326,7 +326,7 @@ class FirebaseService {
                             defer { group.leave() }
                             
                             if let error = error {
-                                print("❌ 답변 데이터 가져오기 실패: \(error)")
+                                print(" 답변 데이터 가져오기 실패: \(error)")
                                 return
                             }
                             
@@ -364,11 +364,11 @@ class FirebaseService {
                 }
                 
                 group.notify(queue: .main) {
-                    print("✅ 모든 질문-답변 쌍 가져오기 완료: \(allPairs.count)개")
+                    print(" 모든 질문-답변 쌍 가져오기 완료: \(allPairs.count)개")
                     // 북마크 수가 많은 순으로 정렬하고 상위 3개만 선택
                     let sortedPairs = allPairs.sorted { $0.answer.bookmarkCount > $1.answer.bookmarkCount }
                     let topThreePairs = Array(sortedPairs.prefix(3))
-                    print("✅ 홈뷰 3개 고르기 완료 ")
+                    print(" 홈뷰 3개 고르기 완료 ")
                     completion(topThreePairs)
                 }
             }
@@ -410,7 +410,7 @@ class FirebaseService {
                 if let error = error {
                     print("questions 업데이트 실패: \(error)")
                 } else {
-                    print("✅ questions 마이그레이션 완료: \(count)개 업뎃댐")
+                    print(" questions 마이그레이션 완료: \(count)개 업뎃댐")
                 }
             }
         }
@@ -420,7 +420,7 @@ class FirebaseService {
             guard let self = self else { return }
             
             if let error = error {
-                print("❌ answers 마이그레이션 실패: \(error)")
+                print(" answers 마이그레이션 실패: \(error)")
                 return
             }
             
@@ -440,9 +440,9 @@ class FirebaseService {
             
             batch.commit { error in
                 if let error = error {
-                    print("❌ answers 배치 업데이트 실패: \(error)")
+                    print(" answers 배치 업데이트 실패: \(error)")
                 } else {
-                    print("✅ answers 마이그레이션 완료: \(count)개 문서 업데이트")
+                    print(" answers 마이그레이션 완료: \(count)개 문서 업데이트")
                     self.defaults.set(true, forKey: self.migrationCompletedKey)
                 }
             }
@@ -457,7 +457,7 @@ class FirebaseService {
             .whereField("status", isEqualTo: "pending")
             .getDocuments { snapshot, error in
                 if let error = error {
-                    print("❌ 질문 확인 실패: \(error)")
+                    print(" 질문 확인 실패: \(error)")
                     completion(false)
                     return
                 }
@@ -713,7 +713,7 @@ class FirebaseService {
         ]
         
         try await db.collection("learners").document(learner.id).setData(learnerData)
-        print("✅ 학습자 데이터 저장 완료: \(learner.name), 카테고리: \(learner.category)")
+        print(" 학습자 데이터 저장 완료: \(learner.name), 카테고리: \(learner.category)")
     }
     
     // 멘토 생성
@@ -730,7 +730,7 @@ class FirebaseService {
         ]
         
         try await db.collection("mentors").document(mentor.id).setData(mentorData)
-        print("✅ 멘토 데이터 저장 완료: \(mentor.name), 전문분야: \(mentor.expertise)")
+        print(" 멘토 데이터 저장 완료: \(mentor.name), 전문분야: \(mentor.expertise)")
     }
     
     // 유저 정보 가져오기 
@@ -809,7 +809,7 @@ class FirebaseService {
                 
                 completion(pendingQuestions.sorted { $0.question.sentDate > $1.question.sentDate })
             } catch {
-                print("❌ 답변 대기 중인 질문 가져오기 실패: \(error)")
+                print(" 답변 대기 중인 질문 가져오기 실패: \(error)")
                 completion([])
             }
         }
@@ -828,6 +828,6 @@ class FirebaseService {
             "sentQuestions": FieldValue.arrayRemove([questionId])
         ])
         
-        print("✅ 답변 대기 중인 질문 삭제 완료: \(questionId)")
+        print(" 답변 대기 중인 질문 삭제 완료: \(questionId)")
     }
 }

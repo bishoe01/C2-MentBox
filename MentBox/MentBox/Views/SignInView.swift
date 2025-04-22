@@ -64,7 +64,7 @@ struct SignInView: View {
                         case .success(let authResults):
                             handleAppleSignIn(result: authResults)
                         case .failure(let error):
-                            print("❌ Apple 로그인 실패: \(error.localizedDescription)")
+                            print(" Apple 로그인 실패: \(error.localizedDescription)")
                             errorMessage = "로그인에 실패했습니다. 다시 시도해주세요."
                             isLoading = false
                         }
@@ -102,23 +102,23 @@ struct SignInView: View {
         // 신규 사용자 정보 입력이 끝났으므로 메인 화면으로 이동
         UserDefaults.standard.set(false, forKey: "isLoggedOut")
         withAnimation {
-            showUserTypeSelection = false   // 회원‑유형 선택 시트 닫기
-            showMainView = true             // ContentView로 전환
+            showUserTypeSelection = false // 회원‑유형 선택 시트 닫기
+            showMainView = true // ContentView로 전환
         }
     }
     
     private func checkSignInStatus() {
         if isLoggedOut {
-            print("❌ 로그아웃 상태")
+            print("로그아웃 상태")
             showMainView = false
             return
         }
         
         if let user = Auth.auth().currentUser {
-            print("✅ 이미 로그인된 사용자: \(user.uid)")
+            print("이미 로그인된 사용자: \(user.uid)")
             showMainView = true
         } else {
-            print("❌ 로그인된 사용자 없음")
+            print(" 로그인된 사용자 없음")
             showMainView = false
         }
     }
@@ -127,9 +127,9 @@ struct SignInView: View {
         do {
             try Auth.auth().signOut()
             UserDefaults.standard.set(true, forKey: "isLoggedOut")
-            print("✅ 로그아웃 성공")
+            print("로그아웃 성공")
         } catch {
-            print("❌ 로그아웃 실패: \(error.localizedDescription)")
+            print("로그아웃 실패: \(error.localizedDescription)")
         }
     }
     
@@ -138,8 +138,8 @@ struct SignInView: View {
               let identityToken = appleIDCredential.identityToken,
               let tokenString = String(data: identityToken, encoding: .utf8)
         else {
-            print("❗️토큰 가져오기 실패")
-            errorMessage = "인증 정보를 가져오는데 실패했습니다."
+            print("토큰 가져오기 실패")
+            errorMessage = "토큰 가져오는데 실패"
             isLoading = false
             return
         }
@@ -152,14 +152,14 @@ struct SignInView: View {
 
         Auth.auth().signIn(with: firebaseCredential) { authResult, error in
             if let error = error {
-                print("❌ Firebase 로그인 실패: \(error.localizedDescription)")
-                errorMessage = "서버 연결에 실패했습니다. 다시 시도해주세요."
+                print("로그인 실패: \(error.localizedDescription)")
+                errorMessage = "서버 연결 실패 / 다시 시도해주세요."
                 isLoading = false
             } else {
-                print("✅ Firebase 로그인 성공! 사용자: \(authResult?.user.uid ?? "없음")")
+                print("로그인 성공 -> 사용자 이름 :  \(authResult?.user.uid ?? "없음")")
                 
                 if let user = authResult?.user {
-                    // 기존 사용자인지 확인
+                    // 기존 사용자인지 볼거야  -> 아니면 이제 실패
                     Task {
                         do {
                             let isExistingUser = try await FirebaseService.shared.checkExistingUser(userId: user.uid)
@@ -174,8 +174,7 @@ struct SignInView: View {
                                 showUserTypeSelection = true
                             }
                         } catch {
-                            print("❌ 사용자 확인 실패: \(error.localizedDescription)")
-                            errorMessage = "사용자 확인에 실패했습니다."
+                            errorMessage = "사용자 로그인 / 확인 실패했습니다."
                             isLoading = false
                         }
                     }
@@ -197,7 +196,7 @@ struct UserInfoInputView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     
-    private let categories = ["tech", "design", "business"]
+    private let categories = ["Tech", "Design", "Business"]
     
     var body: some View {
         NavigationView {
@@ -279,7 +278,7 @@ struct UserInfoInputView: View {
                         sentQuestions: []
                     )
                     try await FirebaseService.shared.createLearner(learner: learner)
-                    print("✅ 학습자 정보 저장 완료: \(name), \(category)")
+                    print(" 학습자 정보 저장 완료: \(name), \(category)")
                     
                 case .mentor:
                     let mentor = Mentor(
@@ -290,13 +289,13 @@ struct UserInfoInputView: View {
                         expertise: expertise
                     )
                     try await FirebaseService.shared.createMentor(mentor: mentor)
-                    print("✅ 멘토 정보 저장 완료: \(name), \(expertise), \(bio)")
+                    print(" 멘토 정보 저장 완료: \(name), \(expertise), \(bio)")
                 }
                 
                 UserDefaults.standard.set(false, forKey: "isLoggedOut")
                 onComplete()
             } catch {
-                print("❌ 사용자 정보 저장 실패: \(error.localizedDescription)")
+                print(" 사용자 정보 저장 실패: \(error.localizedDescription)")
                 errorMessage = "사용자 정보 저장에 실패했습니다."
             }
             isLoading = false

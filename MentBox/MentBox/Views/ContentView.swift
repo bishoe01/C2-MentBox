@@ -12,7 +12,7 @@ struct ContentView: View {
                     .tag(1)
                 MyLetterTabView()
                     .tag(2)
-                ProfileView()
+                ProfileTabView()
                     .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -133,32 +133,13 @@ struct MyLetterTabView: View {
     }
 }
 
-struct ProfileView: View {
-    @State private var showSignInView = false
-    
+struct ProfileTabView: View {
     var body: some View {
         BackgroundView {
-            VStack {
-                Spacer()
-                
-                Button(action: {
-                    SignInView.signOut()
-                    showSignInView = true
-                }) {
-                    Text("로그아웃")
-                        .foregroundColor(.red)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                
-                Spacer()
+            VStack(spacing: 0) {
+                ProfileContentView()
+                Spacer(minLength: 0)
             }
-        }
-        .fullScreenCover(isPresented: $showSignInView) {
-            SignInView()
         }
     }
 }

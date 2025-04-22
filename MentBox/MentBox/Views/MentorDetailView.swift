@@ -291,7 +291,7 @@ struct MentorDetailView: View {
         if let userId = Auth.auth().currentUser?.uid {
             db.collection("learners").document(userId).getDocument { document, error in
                 if let error = error {
-                    print("❌ 사용자 데이터 가져오기 실패: \(error)")
+                    print(" 사용자 데이터 가져오기 실패: \(error)")
                     return
                 }
                 
@@ -309,11 +309,11 @@ struct MentorDetailView: View {
                 
                 batch.commit { error in
                     if let error = error {
-                        print("❌ 데이터 저장 실패: \(error)")
+                        print(" 데이터 저장 실패: \(error)")
                         self.alertMessage = "편지 전송에 실패했습니다."
                         self.showAlert = true
                     } else {
-                        print("✅ 데이터 저장 성공")
+                        print(" 데이터 저장 성공")
                         self.alertMessage = "편지가 성공적으로 전송되었습니다. 답변을 기다려주세요."
                         self.showAlert = true
                         self.questionText = ""
@@ -329,7 +329,7 @@ struct MentorDetailView: View {
     private func loadChatPairs() {
         print("🔍 MentorDetailView - loadChatPairs 시작 - mentorId: \(mentor.id)")
         FirebaseService.shared.fetchQuestionAnswerPairs(for: mentor.id) { pairs in
-            print("✅ MentorDetailView - 데이터 로드 완료 - pairs 개수: \(pairs.count)")
+            print(" MentorDetailView - 데이터 로드 완료 - pairs 개수: \(pairs.count)")
             self.chatPairs = pairs
         }
         

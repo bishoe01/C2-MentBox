@@ -185,7 +185,7 @@ struct ChatCardView: View {
                 let bookmarkedQuestions = try await FirebaseService.shared.getBookmarkedQuestions(userId: userId)
                 isBookmarked = bookmarkedQuestions.contains(question.id)
             } catch {
-                print("❌ 북마크 상태 확인 실패: \(error)")
+                print(" 북마크 상태 확인 실패: \(error)")
             }
         }
     }
@@ -214,7 +214,7 @@ struct ChatCardView: View {
                     isBookmarked.toggle()
                 }
             } catch {
-                print("❌ 북마크 토글 실패: \(error)")
+                print(" 북마크 토글 실패: \(error)")
             }
         }
     }

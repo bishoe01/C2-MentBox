@@ -153,7 +153,7 @@ struct MyLetterView: View {
     
     private func loadData() {
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("❌ 로그인된 사용자가 없습니다.")
+            print(" 로그인된 사용자가 없습니다.")
             Task { @MainActor in
                 isLoading = false
             }
