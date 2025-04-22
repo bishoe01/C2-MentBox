@@ -5,10 +5,6 @@ struct MentorCardView: View {
     @State private var isPressed = false
     @State private var showDetail = false
     
-    var profileImageName: String {
-        "\(mentor.name)"
-    }
-    
     var body: some View {
         Button(action: {
             showDetail = true
@@ -16,7 +12,7 @@ struct MentorCardView: View {
             VStack(alignment: .leading, spacing: 16) {
                 // 프로필이랑 카테고리 이모지 넣는 VSTACK
                 HStack(alignment: .top) {
-                    Image(profileImageName)
+                    Image(mentor.profileImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 50, height: 50)

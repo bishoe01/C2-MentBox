@@ -69,7 +69,7 @@ struct CustomTabBar: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 15))
         .padding(.horizontal, 0)
-        .padding(.bottom, 8)
+        .padding(.bottom, 0)
         .shadow(radius: 10)
         .ignoresSafeArea(.all)
     }

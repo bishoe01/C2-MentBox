@@ -195,12 +195,37 @@ struct UserInfoInputView: View {
     @State private var bio: String = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var selectedProfileImage: String = "Profile1"
     
     private let categories = ["Tech", "Design", "Business"]
+    private let profileImages = ["Profile1", "Profile2", "Profile3", "Profile4"]
     
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("프로필 이미지")) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(profileImages, id: \.self) { imageName in
+                                Button(action: {
+                                    selectedProfileImage = imageName
+                                }) {
+                                    Image(imageName)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(Circle())
+                                        .overlay(
+                                            Circle()
+                                                .stroke(selectedProfileImage == imageName ? Color("Primary") : Color.clear, lineWidth: 2)
+                                        )
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
+                }
+                
                 Section(header: Text("기본 정보")) {
                     TextField("이름", text: $name)
                 }
@@ -268,7 +293,7 @@ struct UserInfoInputView: View {
                         id: user.uid,
                         name: name,
                         email: user.email ?? "",
-                        profileImage: nil,
+                        profileImage: selectedProfileImage,
                         category: category,
                         letterCount: 0,
                         bookmarkedCount: 0,
@@ -285,7 +310,7 @@ struct UserInfoInputView: View {
                         id: user.uid,
                         name: name,
                         bio: bio,
-                        profileImage: "",
+                        profileImage: selectedProfileImage,
                         expertise: expertise
                     )
                     try await FirebaseService.shared.createMentor(mentor: mentor)
