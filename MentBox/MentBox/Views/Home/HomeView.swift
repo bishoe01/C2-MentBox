@@ -46,7 +46,7 @@ struct HomeView: View {
                                 VStack(spacing: 20) {
                                     ForEach(chatPairs.indices, id: \.self) { index in
                                         let pair = chatPairs[index]
-                                        ChatCardView(question: pair.question, answer: pair.answer)
+                                        ChatCard(question: pair.question, answer: pair.answer)
                                     }
                                 }
                                 .padding(.vertical)

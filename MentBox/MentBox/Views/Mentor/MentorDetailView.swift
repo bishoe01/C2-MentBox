@@ -1,6 +1,6 @@
-import SwiftUI
-import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFirestore
+import SwiftUI
 
 struct MentorDetailView: View {
     let mentor: Mentor
@@ -130,7 +130,7 @@ struct MentorDetailView: View {
                                                 }
                                             }
                                             
-                                            ChatCardView(question: pair.question, answer: nil)
+                                            ChatCard(question: pair.question, answer: nil)
                                         }
                                     }
                                 }
@@ -149,7 +149,7 @@ struct MentorDetailView: View {
                             VStack(spacing: 20) {
                                 ForEach(chatPairs.indices, id: \.self) { index in
                                     let pair = chatPairs[index]
-                                    ChatCardView(question: pair.question, answer: pair.answer)
+                                    ChatCard(question: pair.question, answer: pair.answer)
                                 }
                             }
                             .padding(.horizontal)
@@ -223,7 +223,7 @@ struct MentorDetailView: View {
             )
         }
         .alert("질문 삭제", isPresented: $showDeleteAlert) {
-            Button("취소", role: .cancel) { }
+            Button("취소", role: .cancel) {}
             Button("삭제", role: .destructive) {
                 deleteQuestion()
             }
@@ -363,20 +363,6 @@ struct MentorDetailView: View {
                     showAlert = true
                 }
             }
-        }
-    }
-}
-
-struct MentorDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            MentorDetailView(mentor: Mentor(
-                id: "preview_mentor_id",
-                name: "김멘토",
-                bio: "10년차 iOS 개발자",
-                profileImage: "profile_image",
-                expertise: "테크"
-            ))
         }
     }
 }

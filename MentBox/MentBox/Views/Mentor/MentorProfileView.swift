@@ -9,56 +9,59 @@ struct MentorProfileView: View {
     @State private var showSignInView = false
     
     var body: some View {
-        BackgroundView {
+        ZStack {
+            Image("BG")
+                .resizable()
+                .ignoresSafeArea()
             ScrollView {
-                VStack(spacing: 30) {
+                VStack(spacing: 20) {
                     VStack(spacing: 5) {
                         VStack(spacing: 5) {
                             MentBoxHeader(title: "MENTBOX", isPadding: false)
 
                             HStack {
-                                Text("러너 프로필").menterFont(.header)
+                                Text("멘토 프로필").menterFont(.header)
                                 Spacer()
-                            }.padding(.top, 16)
+                            }.padding(.top, 8)
                         }.padding(.horizontal, 16)
                         
-                        // 프로필 섹션
-                        VStack(spacing: 12) {
+                        // 프로필 카드
+                        VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
                                 Image(mentor?.profileImage ?? "default_profile")
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
-                                    .frame(width: 70, height: 70)
+                                    .frame(width: 80, height: 80)
                                     .clipShape(Circle())
                                     .overlay(
                                         Circle()
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 2)
+                                            .stroke(Color.white.opacity(0.25), lineWidth: 3)
                                     )
                                 
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: 6) {
                                     Text(mentor?.name ?? "멘토")
-                                        .font(.title3)
-                                        .fontWeight(.bold)
+                                        .font(.title3.weight(.bold))
                                         .foregroundColor(.white)
                                     
-                                    Text(mentor?.expertise ?? "")
+                                    Text(mentor?.expertise ?? "전문 분야")
                                         .font(.subheadline)
-                                        .foregroundColor(.yellow)
+                                        .foregroundColor(.yellow.opacity(0.9))
                                 }
                                 
                                 Spacer()
                             }
-                            .padding(.horizontal)
                             
-                            if let mentor = mentor {
-                                Text(mentor.bio)
+                            if let bio = mentor?.bio, !bio.isEmpty {
+                                Text(bio)
                                     .font(.body)
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
+                                    .foregroundColor(.white.opacity(0.85))
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
-                        .padding(.vertical, 12)
+                        .padding()
+                        .background(Color.white.opacity(0.25))
+                        .cornerRadius(12)
+                        .padding(.all, 16)
                         
                         // 로그아웃 버튼
                         Button(action: {
@@ -80,7 +83,6 @@ struct MentorProfileView: View {
                         }
                         .padding(.horizontal)
                     }
-                    .padding(.vertical)
                 }
             }
         }

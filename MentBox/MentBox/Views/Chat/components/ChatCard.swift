@@ -1,7 +1,7 @@
 import SwiftUI
 import FirebaseAuth
 
-struct ChatCardView: View {
+struct ChatCard: View {
     let question: ChatBox
     let answer: ChatBox?
     @State private var isPressed = false
@@ -260,9 +260,9 @@ struct ChatCardView: View {
     ZStack {
         Color.black.edgesIgnoringSafeArea(.all)
         VStack {
-            ChatCardView(question: previewQuestion, answer: previewAnswer)
+            ChatCard(question: previewQuestion, answer: previewAnswer)
                 .padding()
-            ChatCardView(question: previewQuestion, answer: nil)
+            ChatCard(question: previewQuestion, answer: nil)
                 .padding()
         }
     }

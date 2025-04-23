@@ -4,112 +4,8 @@ import Foundation
 class FirebaseService {
     static let shared = FirebaseService()
     private let db = Firestore.firestore()
-    private let defaults = UserDefaults.standard
-    private let mockDataUploadedKey = "mockDataUploadedKey"
-    private let migrationCompletedKey = "migrationCompletedKey"
     
     private init() {}
-    
-    func resetAndUploadData() async throws {
-        print("데이터 초기화 시작")
-        
-        try await self.deleteCollection("mentors")
-        try await self.deleteCollection("questions")
-        try await self.deleteCollection("answers")
-        try await self.deleteCollection("bookmarks")
-        
-        UserDefaults.standard.removeObject(forKey: "lastQuestionDate")
-        UserDefaults.standard.removeObject(forKey: "lastQuestionId")
-        
-        try await self.uploadMockData()
-        
-        print(" 데이터 초기화 완료")
-    }
-    
-    private func deleteCollection(_ collection: String) async throws {
-        let snapshot = try await db.collection(collection).getDocuments()
-        let batch = self.db.batch()
-        
-        for document in snapshot.documents {
-            batch.deleteDocument(document.reference)
-        }
-        
-        try await batch.commit()
-        print(" \(collection) 삭제 완료")
-    }
-    
-    func resetMockDataUploaded() {
-        self.defaults.removeObject(forKey: self.mockDataUploadedKey)
-        print(" mockDataUploadedKey 초기화 완료")
-    }
-    
-    func uploadMockData() async throws {
-        // 멘토 데이터 업로드
-        for mentor in MockChatBoxData.mentors {
-            let mentorData: [String: Any] = [
-                "id": mentor.id,
-                "name": mentor.name,
-                "bio": mentor.bio,
-                "profileImage": mentor.profileImage,
-                "expertise": mentor.expertise
-            ]
-            
-            try await self.db.collection("mentors").document(mentor.id).setData(mentorData)
-            print(" 멘토 데이터 업로드 성공: \(mentor.name)")
-        }
-        
-        // 질문과 답변 데이터 업로드
-        for pair in MockChatBoxData.chatPairs {
-            let questionData: [String: Any] = [
-                "id": pair.question.id,
-                "userId": pair.question.userId,
-                "senderName": pair.question.senderName,
-                "content": pair.question.content,
-                "sentDate": Timestamp(date: pair.question.sentDate),
-                "mentorId": pair.question.mentorId,
-                "status": pair.question.status ?? "pending",
-                "bookmarkCount": pair.question.bookmarkCount
-            ]
-            
-            try await self.db.collection("questions").document(pair.question.id).setData(questionData)
-            print(" 질문 데이터 업로드 성공: \(pair.question.id)")
-            
-            // 답변 업로드
-            let answerData: [String: Any] = [
-                "id": pair.answer.id,
-                "userId": pair.answer.userId,
-                "questionId": pair.question.id,
-                "senderName": pair.answer.senderName,
-                "content": pair.answer.content,
-                "sentDate": Timestamp(date: pair.answer.sentDate),
-                "mentorId": pair.answer.mentorId,
-                "bookmarkCount": pair.answer.bookmarkCount
-            ]
-            
-            try await self.db.collection("answers").document(pair.answer.id).setData(answerData)
-            print(" 답변 데이터 업로드 성공: \(pair.answer.id)")
-        }
-        
-        // 현재 사용자의 Learner 데이터 업로드
-        let learner = MockChatBoxData.currentLearner
-        let learnerData: [String: Any] = [
-            "name": learner.name,
-            "email": learner.email,
-            "profileImage": learner.profileImage as Any,
-            "category": learner.category,
-            "letterCount": learner.letterCount,
-            "bookmarkedCount": learner.bookmarkedCount,
-            "createdAt": Timestamp(date: learner.createdAt),
-            "lastLoginAt": Timestamp(date: learner.lastLoginAt),
-            "bookmarkedQuestions": learner.bookmarkedQuestions,
-            "sentQuestions": learner.sentQuestions
-        ]
-        
-        try await self.db.collection("learners").document(learner.id).setData(learnerData)
-        print(" 사용자 데이터 업로드 성공: \(learner.name)")
-        
-        print(" 모든 더미 데이터 업로드 완료")
-    }
     
     // 멘토들 목록 가져옴
     func fetchMentors(completion: @escaping ([Mentor]) -> Void) {
@@ -117,7 +13,7 @@ class FirebaseService {
             if let error = error {
                 print(" 멘토 데이터 가져오기 실패: \(error)")
                 completion([])
-                return
+                return // 필요성 ?
             }
             
             var mentors: [Mentor] = []
@@ -144,8 +40,6 @@ class FirebaseService {
     
     // Mentor DetailView에서 멘토의 질문-답변 페어로 묶어서 가져오기
     func fetchQuestionAnswerPairs(for mentorId: String, completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
-        print("🔍 fetchQuestionAnswerPairs 시작 - mentorId: \(mentorId)")
-        
         // 멘토정보 먼저 가져오기
         self.db.collection("mentors").document(mentorId).getDocument { mentorDoc, error in
             if let error = error {
@@ -155,7 +49,6 @@ class FirebaseService {
             }
             
             guard let mentorData = mentorDoc?.data() else {
-                print("⚠️ 멘토 데이터가 존재하지 않습니다. mentorId: \(mentorId)")
                 completion([])
                 return
             }
@@ -193,7 +86,6 @@ class FirebaseService {
                               let bookmarkCount = questionData["bookmarkCount"] as? Int,
                               let status = questionData["status"] as? String
                         else {
-                            print("⚠️ 질문 데이터 형식이 올바르지 않습니다. questionId: \(questionDoc.documentID)")
                             continue
                         }
                         
@@ -224,7 +116,6 @@ class FirebaseService {
                                 }
                                 
                                 guard let answerDoc = answerSnapshot?.documents.first else {
-                                    print("⚠️ 답변 없음 - questionId: \(questionDoc.documentID)")
                                     return
                                 }
                                 
@@ -250,7 +141,7 @@ class FirebaseService {
                                     )
                                     pairs.append((question: question, answer: answer))
                                 } else {
-                                    print("⚠️ 답변 데이터 형식이 올바르지 않습니다. answerId: \(answerDoc.documentID)")
+                                    print("에러 - answerId: \(answerDoc.documentID)")
                                 }
                             }
                     }
@@ -265,7 +156,6 @@ class FirebaseService {
     // MARK: 상위 질문 질문 답변 가져오기 ( HomeView 하단에 들어갈 것 - 아마 3개 ?)
 
     func fetchAllQuestionAnswerPairs(completion: @escaping ([(question: ChatBox, answer: ChatBox)]) -> Void) {
-        print("🔍 fetchAllQuestionAnswerPairs 시작")
         var allPairs: [(question: ChatBox, answer: ChatBox)] = []
         let group = DispatchGroup()
         
@@ -280,12 +170,12 @@ class FirebaseService {
                 }
                 
                 guard let questions = questionSnapshot?.documents else {
-                    print("⚠️ 질문 데이터가 없습니다")
+                    print("질문 데이터가 없습니다")
                     completion([])
                     return
                 }
                 
-                print(" 질문 데이터 가져오기 성공: \(questions.count)개")
+                print(" 질문 데이터 가져오기: \(questions.count)개")
                 
                 for questionDoc in questions {
                     let questionData = questionDoc.data()
@@ -297,7 +187,7 @@ class FirebaseService {
                           let bookmarkCount = questionData["bookmarkCount"] as? Int,
                           let status = questionData["status"] as? String
                     else {
-                        print("⚠️ 질문 데이터 형식이 올바르지 않습니다. questionId: \(questionDoc.documentID)")
+                        print("질문 데이터 형식이 이상함 questionId: \(questionDoc.documentID)")
                         continue
                     }
                     
@@ -328,7 +218,6 @@ class FirebaseService {
                             }
                             
                             guard let answerDoc = answerSnapshot?.documents.first else {
-                                print("⚠️ 답변 없음 - questionId: \(questionDoc.documentID)")
                                 return
                             }
                             
@@ -355,97 +244,21 @@ class FirebaseService {
                                 allPairs.append((question: question, answer: answer))
 
                             } else {
-                                print("⚠️ 답변 데이터 형식이 올바르지 않습니다. answerId: \(answerDoc.documentID)")
+                                print("답변 데이터 형식이 이상 answerId: \(answerDoc.documentID)")
                             }
                         }
                 }
                 
                 group.notify(queue: .main) {
-                    print(" 모든 질문-답변 쌍 가져오기 완료: \(allPairs.count)개")
+                    print(" 모든 질문-답변 페어 :  \(allPairs.count)개")
                     // 북마크 수가 많은 순으로 정렬하고 상위 3개만 선택
                     let sortedPairs = allPairs.sorted { $0.answer.bookmarkCount > $1.answer.bookmarkCount }
                     let topThreePairs = Array(sortedPairs.prefix(3))
-                    print(" 홈뷰 3개 고르기 완료 ")
                     completion(topThreePairs)
                 }
             }
     }
-    
-    // 데이터 구조 바꿀때 사용 (필드값)
-    func migrateDatabase() {
-        if self.defaults.bool(forKey: self.migrationCompletedKey) {
-            print("마이그레이션 끝 ")
-            return
-        }
-        
-        print("마이그레이션 시작")
-        
-        // questions 컬렉션 마이그레이션
-        self.db.collection("questions").getDocuments { [weak self] snapshot, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("마이그레이션 실패: \(error)")
-                return
-            }
-            
-            let batch = self.db.batch()
-            var count = 0
-            
-            for document in snapshot?.documents ?? [] {
-                // senderName을 userId로 복사 (임시로)
-                let userId = document.data()["senderName"] as? String ?? "unknown"
-                
-                batch.updateData([
-                    "userId": userId
-                ], forDocument: document.reference)
-                
-                count += 1
-            }
-            
-            batch.commit { error in
-                if let error = error {
-                    print("questions 업데이트 실패: \(error)")
-                } else {
-                    print(" questions 마이그레이션 완료: \(count)개 업뎃댐")
-                }
-            }
-        }
-        
-        // answers 컬렉션 마이그레이션
-        self.db.collection("answers").getDocuments { [weak self] snapshot, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print(" answers 마이그레이션 실패: \(error)")
-                return
-            }
-            
-            let batch = self.db.batch()
-            var count = 0
-            
-            for document in snapshot?.documents ?? [] {
-                // senderName을 userId로 복사 (임시로)
-                let userId = document.data()["senderName"] as? String ?? "unknown"
-                
-                batch.updateData([
-                    "userId": userId
-                ], forDocument: document.reference)
-                
-                count += 1
-            }
-            
-            batch.commit { error in
-                if let error = error {
-                    print(" answers 배치 업데이트 실패: \(error)")
-                } else {
-                    print(" answers 마이그레이션 완료: \(count)개 문서 업데이트")
-                    self.defaults.set(true, forKey: self.migrationCompletedKey)
-                }
-            }
-        }
-    }
-    
+
     // MARK: - 편지 제한 확인 메서드
 
     func canSendQuestion(userId: String, mentorId: String, completion: @escaping (Bool) -> Void) {
@@ -458,19 +271,17 @@ class FirebaseService {
                     completion(false)
                     return
                 }
-                
                 // pending 상태인 질문이 없으면 true (새 질문 가능)
                 completion(snapshot?.documents.isEmpty ?? true)
             }
     }
     
     // MARK: - 북마크 관련 메서드
-    
+
     // 북마크 추가
     func addBookmark(questionId: String, userId: String) async throws {
         let db = Firestore.firestore()
         
-        // 북마크 문서 생성
         let bookmarkData: [String: Any] = [
             "questionId": questionId,
             "userId": userId,
@@ -479,19 +290,16 @@ class FirebaseService {
         
         try await db.collection("bookmarks").addDocument(data: bookmarkData)
         
-        // 사용자의 bookmarkedQuestions 배열 업데이트
         let userRef = db.collection("learners").document(userId)
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayUnion([questionId])
         ])
         
-        // 질문과 답변의 북마크 카운트 업데이트
         let questionRef = db.collection("questions").document(questionId)
         try await questionRef.updateData([
             "bookmarkCount": FieldValue.increment(Int64(1))
         ])
         
-        // 해당 질문의 답변 찾기
         let answerQuery = db.collection("answers")
             .whereField("questionId", isEqualTo: questionId)
         
@@ -502,7 +310,6 @@ class FirebaseService {
             ])
         }
         
-        // 북마크 추가 알림 (메인 스레드에서)
         await MainActor.run {
             NotificationCenter.default.post(
                 name: NSNotification.Name("BookmarkChanged"),
@@ -526,19 +333,18 @@ class FirebaseService {
             try await document.reference.delete()
         }
         
-        // 사용자의 bookmarkedQuestions 배열 업데이트
+        // MARK: bookmarkedQuestions 배열
+
         let userRef = db.collection("learners").document(userId)
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayRemove([questionId])
         ])
         
-        // 질문과 답변의 북마크 카운트 업데이트
         let questionRef = db.collection("questions").document(questionId)
         try await questionRef.updateData([
             "bookmarkCount": FieldValue.increment(Int64(-1))
         ])
         
-        // 해당 질문의 답변 찾기
         let answerQuery = db.collection("answers")
             .whereField("questionId", isEqualTo: questionId)
         
@@ -549,7 +355,6 @@ class FirebaseService {
             ])
         }
         
-        // 북마크 제거 알림 (메인 스레드에서)
         await MainActor.run {
             NotificationCenter.default.post(
                 name: NSNotification.Name("BookmarkChanged"),
@@ -570,7 +375,6 @@ class FirebaseService {
         return []
     }
 
-    // 공통 함수
     private func fetchQuestionAnswerPair(questionId: String) async throws -> (question: ChatBox, answer: ChatBox)? {
         let questionDoc = try await db.collection("questions").document(questionId).getDocument()
         guard let questionData = questionDoc.data() else { return nil }
@@ -679,15 +483,14 @@ class FirebaseService {
     
     // MARK: - 사용자 관련 메서드
     
-    // 기존 사용자인지 확인
+    // 기존 회원인지 파악
     func checkExistingUser(userId: String) async throws -> Bool {
-        // learners 컬렉션에서 확인
+        // learners 에서 한번 보고  -> 이래서 둘다 겹칠때 러너로 접속됨
         let learnerDoc = try await db.collection("learners").document(userId).getDocument()
         if learnerDoc.exists {
             return true
         }
-        
-        // mentors 컬렉션에서 확인
+        // mentors 컬렉션에서 보기
         let mentorDoc = try await db.collection("mentors").document(userId).getDocument()
         return mentorDoc.exists
     }
@@ -750,18 +553,7 @@ class FirebaseService {
             sentQuestions: data["sentQuestions"] as? [String] ?? []
         )
     }
-    
-    // USER SENT QUESTION 가져오는 함수  ->  learner 컬렉션에서 sentQuestions 필드 값 가져오기
-    func getSentQuestions(userId: String) async throws -> [String] {
-        let db = Firestore.firestore()
-        let userDoc = try await db.collection("learners").document(userId).getDocument()
-        
-        if let sentQuestions = userDoc.data()?["sentQuestions"] as? [String] {
-            return sentQuestions
-        }
-        return []
-    }
-
+ 
     // 답변 대기 중인 질문 가져오기
     func fetchPendingQuestions(userId: String, completion: @escaping ([(question: ChatBox, mentor: Mentor)]) -> Void) {
         Task {
@@ -816,18 +608,14 @@ class FirebaseService {
     func deletePendingQuestion(questionId: String, userId: String) async throws {
         let db = Firestore.firestore()
         
-        // questions 컬렉션에서 질문 삭제
         try await db.collection("questions").document(questionId).delete()
         
-        // learner 컬렉션의 sentQuestions 필드에서 questionId 제거
         let userRef = db.collection("learners").document(userId)
         try await userRef.updateData([
             "sentQuestions": FieldValue.arrayRemove([questionId])
         ])
-        
-        print(" 답변 대기 중인 질문 삭제 완료: \(questionId)")
     }
-
+    
     // 멘토의 대기 중인 질문 가져오기
     func fetchPendingQuestionsForMentor(mentorId: String, completion: @escaping ([(question: ChatBox, learner: Learner)]) -> Void) {
         Task {
@@ -869,7 +657,6 @@ class FirebaseService {
                     completion(pendingPairs)
                 }
             } catch {
-                print(" 멘토의 대기 중인 질문 가져오기 실패: \(error)")
                 await MainActor.run {
                     completion([])
                 }
@@ -882,7 +669,6 @@ class FirebaseService {
         let db = Firestore.firestore()
         let answerId = UUID().uuidString
         
-        // 답변 데이터 생성
         let answerData: [String: Any] = [
             "id": answerId,
             "messageType": "answer",
@@ -896,42 +682,11 @@ class FirebaseService {
             "questionId": questionId
         ]
         
-        // 답변 저장
         try await db.collection("answers").document(answerId).setData(answerData)
         
-        // 질문 상태 업데이트
         try await db.collection("questions").document(questionId).updateData([
             "status": "answered",
             "answerId": answerId
         ])
-    }
-
-    // 사연 보내기
-    func sendQuestionToMentor(mentorId: String, content: String) async throws {
-        let db = Firestore.firestore()
-        let questionId = UUID().uuidString
-        
-        // 질문 데이터 생성
-        let questionData: [String: Any] = [
-            "id": questionId,
-            "userId": "4gGsjHzRmXa51VGNaaKt35eeYmY2", // 고정된 사용자 ID
-            "senderName": "테스트 사용자",
-            "content": content,
-            "sentDate": Timestamp(date: Date()),
-            "mentorId": mentorId,
-            "status": "pending",
-            "bookmarkCount": 0
-        ]
-        
-        // 질문 저장
-        try await db.collection("questions").document(questionId).setData(questionData)
-        
-        // 사용자의 sentQuestions 배열 업데이트
-        let userRef = db.collection("learners").document("4gGsjHzRmXa51VGNaaKt35eeYmY2")
-        try await userRef.updateData([
-            "sentQuestions": FieldValue.arrayUnion([questionId])
-        ])
-        
-        print("📝 사연 전송 완료 - 멘토 ID: \(mentorId)")
     }
 }

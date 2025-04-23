@@ -115,7 +115,7 @@ struct MyLetterView: View {
                                                 }
                                             }
                                             
-                                            ChatCardView(question: pair.question, answer: nil)
+                                            ChatCard(question: pair.question, answer: nil)
                                         }
                                     }
                                 }
@@ -136,7 +136,7 @@ struct MyLetterView: View {
                                     
                                     ForEach(answeredQuestions.indices, id: \.self) { index in
                                         let pair = answeredQuestions[index]
-                                        ChatCardView(question: pair.question, answer: pair.answer!)
+                                        ChatCard(question: pair.question, answer: pair.answer!)
                                     }
                                 }
                             }

@@ -1,8 +1,8 @@
 import SwiftUI
 
 enum MenterFontStyle {
-    case logoHeader
-    case header // 24 Bold
+    case logoHeader // 32
+    case header // 26 Bold
     case subtitle // 20 Semibold
     case body // 16 Regular
     case caption // 14 Regular
@@ -77,8 +77,7 @@ extension View {
     }
 }
 
-import SwiftUI
-
+// HEX컬러 먹이기 위한 extension
 extension Color {
     init(hex: String, opacity: Double = 1.0) {
         var cString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()

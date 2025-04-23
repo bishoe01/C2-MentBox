@@ -26,7 +26,7 @@ struct LearnerProfileView: View {
                     .scaleEffect(1.5)
             } else {
                 ScrollView {
-                    VStack(spacing: 30) {
+                    VStack(spacing: 20) {
                         VStack(spacing: 5) {
                             MentBoxHeader(title: "MENTBOX", isPadding: false)
 
@@ -109,7 +109,7 @@ struct LearnerProfileView: View {
                                                 }
                                             }
 
-                                            ChatCardView(question: pair.question, answer: nil)
+                                            ChatCard(question: pair.question, answer: nil)
                                         }
                                     }
                                 }
@@ -139,7 +139,7 @@ struct LearnerProfileView: View {
                                     VStack(spacing: 20) {
                                         ForEach(chatPairs.indices, id: \.self) { index in
                                             let pair = chatPairs[index]
-                                            ChatCardView(question: pair.question, answer: pair.answer)
+                                            ChatCard(question: pair.question, answer: pair.answer)
                                         }
                                     }
                                     .padding(.vertical)
