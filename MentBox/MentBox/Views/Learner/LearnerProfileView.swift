@@ -162,7 +162,7 @@ struct LearnerProfileView: View {
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color.red.opacity(0.8))
+                                    .background(.gray.opacity(0.8))
                                     .cornerRadius(10)
                             }
                             .padding(.horizontal)

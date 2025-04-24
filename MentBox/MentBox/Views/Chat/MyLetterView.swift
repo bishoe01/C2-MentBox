@@ -42,7 +42,7 @@ struct MyLetterView: View {
                 .edgesIgnoringSafeArea(.all)
             
             ScrollView {
-                VStack(spacing: 30) {
+                VStack(spacing: 20) {
                     VStack(spacing: 5) {
                         MentBoxHeader(title: "MENTBOX", isPadding: false)
                         
@@ -128,11 +128,10 @@ struct MyLetterView: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     HStack {
                                         Text("답변 완료")
-                                            .font(.headline)
+                                            .menterFont(.header)
                                             .foregroundColor(.white)
                                         Spacer()
                                     }
-                                    .padding(.horizontal)
                                     
                                     ForEach(answeredQuestions.indices, id: \.self) { index in
                                         let pair = answeredQuestions[index]
@@ -141,7 +140,7 @@ struct MyLetterView: View {
                                 }
                             }
                         }
-                        .padding(.vertical)
+                        .padding(.bottom, 8)
                     }
                 }
                 .padding(.horizontal, 16)
