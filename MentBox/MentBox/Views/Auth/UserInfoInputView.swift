@@ -1,6 +1,5 @@
-import SwiftUI
 import FirebaseAuth
-
+import SwiftUI
 
 struct UserInfoInputView: View {
     let userType: UserType
@@ -30,7 +29,7 @@ struct UserInfoInputView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("프로필 이미지")) {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -161,4 +160,4 @@ struct UserInfoInputView: View {
             }
         }
     }
-} 
+}
