@@ -14,6 +14,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct MentBoxApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var authNavigationManager = AuthNavigationManager()
+
 
     init() {
         // 다크 모드 강제 설정
@@ -28,6 +30,7 @@ struct MentBoxApp: App {
         WindowGroup {
             SignInView()
                 .ignoresSafeArea(.all)
+                .environmentObject(authNavigationManager)
         }
     }
 }
