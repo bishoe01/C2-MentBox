@@ -23,20 +23,18 @@ struct UserTypeSelectionView: View {
                     .bold()
                 
                 VStack(spacing: 20) {
-                    NavigationLink {
-                        UserInfoInputView(userType: .learner) {
-                            navigationManager.setMainRoot(userType: .learner)
+                    ForEach(UserTypeConstants.options, id: \.userType) { item in
+                        NavigationLink {
+                            UserInfoInputView(userType: item.userType) {
+                                navigationManager.setMainRoot(userType: item.userType)
+                            }
+                        } label: {
+                            UserTypeSelectView(
+                                iconName: item.iconName,
+                                title: item.title,
+                                description: item.description
+                            )
                         }
-                    } label: {
-                        UserTypeSelectView(iconName: "person.fill", title: "Learner", description: "멘토에게 질문하고 답변을 받습니다.")
-                    }
-                    
-                    NavigationLink {
-                        UserInfoInputView(userType: .mentor) {
-                            navigationManager.setMainRoot(userType: .mentor)
-                        }
-                    } label: {
-                        UserTypeSelectView(iconName: "person.fill.checkmark", title: "Mentor", description: "학습자의 질문에 답변해주세요")
                     }
                 }
                 .padding()
