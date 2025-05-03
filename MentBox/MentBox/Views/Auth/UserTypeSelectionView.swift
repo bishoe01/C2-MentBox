@@ -31,7 +31,6 @@ struct UserTypeSelectionView: View {
                     } label: {
                         UserTypeSelectView(iconName: "person.fill", title: "Learner", description: "멘토에게 질문하고 답변을 받습니다.")
                     }
-//                    NavigationLink(isac)
                     
                     Button {
                         selectedUserType = .mentor
