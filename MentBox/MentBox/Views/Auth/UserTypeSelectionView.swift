@@ -2,13 +2,11 @@ import SwiftUI
 
 struct UserTypeSelectionView: View {
     @Binding var selectedUserType: UserType?
-    let onSelection: (UserType) -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var showUserInfoInput = false
+    @EnvironmentObject var navigationManager: NavigationManager
     
-    init(selectedUserType: Binding<UserType?>, onSelection: @escaping (UserType) -> Void) {
+    init(selectedUserType: Binding<UserType?>) {
         self._selectedUserType = selectedUserType
-        self.onSelection = onSelection
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             if let window = windowScene.windows.first {
@@ -25,16 +23,18 @@ struct UserTypeSelectionView: View {
                     .bold()
                 
                 VStack(spacing: 20) {
-                    Button {
-                        selectedUserType = .learner
-                        showUserInfoInput = true
+                    NavigationLink {
+                        UserInfoInputView(userType: .learner) {
+                            navigationManager.setMainRoot(userType: .learner)
+                        }
                     } label: {
                         UserTypeSelectView(iconName: "person.fill", title: "Learner", description: "멘토에게 질문하고 답변을 받습니다.")
                     }
                     
-                    Button {
-                        selectedUserType = .mentor
-                        showUserInfoInput = true
+                    NavigationLink {
+                        UserInfoInputView(userType: .mentor) {
+                            navigationManager.setMainRoot(userType: .mentor)
+                        }
                     } label: {
                         UserTypeSelectView(iconName: "person.fill.checkmark", title: "Mentor", description: "학습자의 질문에 답변해주세요")
                     }
@@ -46,14 +46,6 @@ struct UserTypeSelectionView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("닫기") {
                         dismiss()
-                    }
-                }
-            }
-            .sheet(isPresented: $showUserInfoInput) {
-                if let userType = selectedUserType {
-                    UserInfoInputView(userType: userType) {
-                        dismiss()
-                        onSelection(userType)
                     }
                 }
             }

@@ -36,6 +36,9 @@ class NavigationManager: ObservableObject {
     func navigate(to destination: LearnerView) {
         path.append(destination)
     }
+    func navigate(to destination: AuthView) {
+        path.append(destination)
+    }
 
     func popToRoot() {
         path = NavigationPath()

@@ -5,6 +5,7 @@ struct UserInfoInputView: View {
     let userType: UserType
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var navigationManager: NavigationManager
     
     @State private var name: String = ""
     @State private var category: UserCategory = .tech

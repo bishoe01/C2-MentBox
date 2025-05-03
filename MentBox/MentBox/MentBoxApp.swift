@@ -39,9 +39,7 @@ struct MentBoxApp: App {
             case .userTypeSelection:
                 UserTypeSelectionView(
                     selectedUserType: .constant(nil)
-                ) { userType in
-                    navigationManager.rootView = .userInfoInput(userType)
-                }
+                )
             case .userInfoInput(let userType):
                 UserInfoInputView(userType: userType) {
                     navigationManager.setMainRoot(userType: userType)
