@@ -9,6 +9,10 @@ enum UserType {
     case mentor
 }
 
+extension UserType: Identifiable {
+    var id: Int { hashValue }
+}
+
 struct SignInView: View {
     @State private var isSignedIn = false
     @State private var errorMessage: String?
@@ -16,6 +20,7 @@ struct SignInView: View {
     @State private var showUserTypeSelection = false
     @State private var selectedUserType: UserType?
     @State private var currentUserType: UserType?
+    @EnvironmentObject var navigationManager: NavigationManager
     
     @AppStorage("isLoggedOut") private var isLoggedOut = false
     
@@ -83,11 +88,16 @@ struct SignInView: View {
                     .frame(height: 40)
             }
         }
-        .sheet(isPresented: $showUserTypeSelection) {
-            UserTypeSelectionView(selectedUserType: $selectedUserType) { userType in
-                handleUserTypeSelection(userType: userType)
-            }
-        }
+        // NavigationLink(value: AuthView.userTypeSelection) {
+        //     UserTypeSelectionView(selectedUserType: $selectedUserType) { userType in
+        //         handleUserTypeSelection(userType: userType)
+        //     }
+        // }
+        // .sheet(isPresented: $showUserTypeSelection) {
+        //     UserTypeSelectionView(selectedUserType: $selectedUserType) { userType in
+        //         handleUserTypeSelection(userType: userType)
+        //     }
+        // }
         .onAppear {
             if !isLoggedOut {
                 checkUserType()
@@ -178,7 +188,7 @@ struct SignInView: View {
                     Task {
                         do {
                             let isExistingUser = try await FirebaseService.shared.checkExistingUser(userId: user.uid)
-                            if isExistingUser {                                
+                            if isExistingUser {
                                 await MainActor.run {
                                     isLoading = true
                                 }
@@ -186,6 +196,7 @@ struct SignInView: View {
                             } else {
                                 await MainActor.run {
                                     isLoading = false
+                                    navigationManager.rootView = .userTypeSelection
                                     showUserTypeSelection = true
                                 }
                             }
@@ -214,8 +225,4 @@ struct SignInView: View {
 
 #Preview {
     SignInView()
-}
-
-extension UserType: Identifiable {
-    var id: Int { hashValue }
 }

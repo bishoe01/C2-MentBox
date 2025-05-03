@@ -67,3 +67,12 @@ fastlane/test_output
 
 # Firebase
 GoogleService-Info.plist
+
+# Xcode project files
+*.pbxproj
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/project.xcworkspace
+!*.xcodeproj/xcshareddata
+!*.xcworkspace/contents.xcworkspacedata
+

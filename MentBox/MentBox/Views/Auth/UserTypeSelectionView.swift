@@ -2,15 +2,12 @@ import SwiftUI
 
 struct UserTypeSelectionView: View {
     @Binding var selectedUserType: UserType?
-    let onSelection: (UserType) -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var showUserInfoInput = false
+    @EnvironmentObject var navigationManager: NavigationManager
     
-    init(selectedUserType: Binding<UserType?>, onSelection: @escaping (UserType) -> Void) {
+    init(selectedUserType: Binding<UserType?>) {
         self._selectedUserType = selectedUserType
-        self.onSelection = onSelection
         
-        // 다크 모드 강제 설정
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             if let window = windowScene.windows.first {
                 window.overrideUserInterfaceStyle = .dark
@@ -19,49 +16,25 @@ struct UserTypeSelectionView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 30) {
                 Text("회원 유형을 선택해주세요")
                     .font(.title2)
                     .bold()
                 
                 VStack(spacing: 20) {
-                    Button {
-                        selectedUserType = .learner
-                        showUserInfoInput = true
-                    } label: {
-                        VStack(spacing: 10) {
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                            Text("학습자")
-                                .font(.title3)
-                            Text("멘토에게 질문하고 답변을 받아보세요")
-                                .font(.caption)
-                                .foregroundColor(.gray)
+                    ForEach(UserTypeConstants.options, id: \.userType) { item in
+                        NavigationLink {
+                            UserInfoInputView(userType: item.userType) {
+                                navigationManager.setMainRoot(userType: item.userType)
+                            }
+                        } label: {
+                            UserTypeSelectView(
+                                iconName: item.iconName,
+                                title: item.title,
+                                description: item.description
+                            )
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color("Primary").opacity(0.1))
-                        .cornerRadius(10)
-                    }
-                    
-                    Button {
-                        selectedUserType = .mentor
-                        showUserInfoInput = true
-                    } label: {
-                        VStack(spacing: 10) {
-                            Image(systemName: "person.fill.checkmark")
-                                .font(.system(size: 40))
-                            Text("멘토")
-                                .font(.title3)
-                            Text("학습자들의 질문에 답변해주세요")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color("Primary").opacity(0.1))
-                        .cornerRadius(10)
                     }
                 }
                 .padding()
@@ -74,14 +47,6 @@ struct UserTypeSelectionView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showUserInfoInput) {
-                if let userType = selectedUserType {
-                    UserInfoInputView(userType: userType) {
-                        dismiss()
-                        onSelection(userType)
-                    }
-                }
-            }
         }
     }
-} 
+}
