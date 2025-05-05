@@ -53,7 +53,7 @@ struct SignInView: View {
                 
                 if isLoading {
                     ProgressView()
-                        .padding()
+//                        .padding()
                 }
                 
                 SignInWithAppleButton(
@@ -88,29 +88,19 @@ struct SignInView: View {
                     .frame(height: 40)
             }
         }
-        // NavigationLink(value: AuthView.userTypeSelection) {
-        //     UserTypeSelectionView(selectedUserType: $selectedUserType) { userType in
-        //         handleUserTypeSelection(userType: userType)
-        //     }
-        // }
-        // .sheet(isPresented: $showUserTypeSelection) {
-        //     UserTypeSelectionView(selectedUserType: $selectedUserType) { userType in
-        //         handleUserTypeSelection(userType: userType)
-        //     }
-        // }
         .onAppear {
             if !isLoggedOut {
                 checkUserType()
             }
         }
-        .fullScreenCover(item: $currentUserType) { userType in
-            switch userType {
-            case .learner:
-                LearnerMainView()
-            case .mentor:
-                MentorMainView()
-            }
-        }
+//        .fullScreenCover(item: $currentUserType) { userType in
+//            switch userType {
+//            case .learner:
+//                LearnerMainView()
+//            case .mentor:
+//                MentorMainView()
+//            }
+//        }
     }
     
     private func handleUserTypeSelection(userType: UserType) {
@@ -121,6 +111,7 @@ struct SignInView: View {
         }
     }
     
+    // 이미 가입이 되어 있을 때
     private func checkUserType() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
@@ -132,6 +123,7 @@ struct SignInView: View {
                 if let _ = try await FirebaseService.shared.fetchLearner(userId: userId) {
                     await MainActor.run {
                         currentUserType = .learner
+                        navigationManager.setMainRoot(userType: .learner)
                         isLoading = false
                     }
                     return
@@ -142,6 +134,9 @@ struct SignInView: View {
                 if mentorDoc.exists {
                     await MainActor.run {
                         currentUserType = .mentor
+                        print("멘토 로그인 성공 - 화면 전환 시도")
+                        navigationManager.setMainRoot(userType: .mentor)
+                        print("멘토 화면 전환 완료: \(navigationManager.rootView)")
                         isLoading = false
                     }
                 } else {
@@ -196,7 +191,7 @@ struct SignInView: View {
                             } else {
                                 await MainActor.run {
                                     isLoading = false
-                                    navigationManager.rootView = .userTypeSelection
+                                    navigationManager.rootView = .auth(.userTypeSelection)
                                     showUserTypeSelection = true
                                 }
                             }
