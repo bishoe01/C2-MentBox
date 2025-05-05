@@ -93,14 +93,6 @@ struct SignInView: View {
                 checkUserType()
             }
         }
-//        .fullScreenCover(item: $currentUserType) { userType in
-//            switch userType {
-//            case .learner:
-//                LearnerMainView()
-//            case .mentor:
-//                MentorMainView()
-//            }
-//        }
     }
     
     private func handleUserTypeSelection(userType: UserType) {
