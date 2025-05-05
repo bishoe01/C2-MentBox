@@ -13,6 +13,7 @@ struct LearnerProfileView: View {
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
+    @EnvironmentObject var navigationManager: NavigationManager
 
     var body: some View {
         ZStack {
@@ -147,11 +148,10 @@ struct LearnerProfileView: View {
                             }
                             .padding(.horizontal, 16)
 
-                            // 로그아웃
                             Button(action: {
                                 do {
                                     try Auth.auth().signOut()
-                                    showSignInView = true
+                                    navigationManager.setAuthRoot()
                                 } catch {
                                     alertMessage = "로그아웃에 실패했습니다."
                                     showAlert = true
@@ -186,9 +186,6 @@ struct LearnerProfileView: View {
             }
         } message: {
             Text("이 질문을 삭제하시겠습니까?")
-        }
-        .fullScreenCover(isPresented: $showSignInView) {
-            SignInView()
         }
         .onAppear {
             loadUserData()

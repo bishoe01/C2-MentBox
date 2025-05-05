@@ -1,5 +1,11 @@
 import SwiftUI
 
+enum AppRootView: Equatable {
+    case auth(AuthView)
+    case mentor(MentorView)
+    case learner(LearnerView)
+}
+
 // Auth뷰
 enum AuthView: Hashable {
     case login
@@ -9,7 +15,6 @@ enum AuthView: Hashable {
 
 // Mentor뷰
 enum MentorView: Hashable {
-    case profile
     case home
     case myPage
 }
@@ -18,24 +23,23 @@ enum MentorView: Hashable {
 enum LearnerView: Hashable {
     case home
     case chatRoom(mentorId: String)
-    case profile
     case myPage
-    case bookMark
+    case myLetter
 }
 
 class NavigationManager: ObservableObject {
     @Published var path = NavigationPath()
-    @Published var rootView: AuthView = .login
-    @Published var mentorView: MentorView?
-    @Published var learnerView: LearnerView?
-    
+    @Published var rootView: AppRootView = .auth(.login)
+
+    // 같은이름 navigate는 추후 수정이 필요할 듯 책임 명확히
     func navigate(to destination: MentorView) {
         path.append(destination)
     }
-    
+
     func navigate(to destination: LearnerView) {
         path.append(destination)
     }
+
     func navigate(to destination: AuthView) {
         path.append(destination)
     }
@@ -47,23 +51,19 @@ class NavigationManager: ObservableObject {
     func pop() {
         path.removeLast()
     }
-    
-    func setMainRoot(userType: UserType) {  //로그인할 떄 넣어줘야하는 페이지 
+
+    func setMainRoot(userType: UserType) {
         path = NavigationPath()
-        rootView = .userTypeSelection
-        if userType == .mentor { // 멘토뷰 
-            mentorView = .profile
-            learnerView = nil
-        } else {  //러너 뷰 
-            mentorView = nil
-            learnerView = .profile
+        switch userType {
+        case .mentor:
+            rootView = .mentor(.home)
+        case .learner:
+            rootView = .learner(.home)
         }
     }
-    
-    func setAuthRoot() {  // 로그아웃 했을 때 씀 
+
+    func setAuthRoot() {
         path = NavigationPath()
-        rootView = .login
-        mentorView = nil
-        learnerView = nil
+        rootView = .auth(.login)
     }
 }

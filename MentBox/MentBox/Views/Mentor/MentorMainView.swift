@@ -4,6 +4,7 @@ struct MentorMainView: View {
     @State private var selectedTab = 0
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
+    @EnvironmentObject var navigationManager: NavigationManager
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -30,7 +31,10 @@ struct MentorMainView: View {
             
             MentorTabBar(selectedTab: $selectedTab)
         }
-        .onAppear { loadData() }
+        .onAppear {
+            print("MENTORVBIEW 나타남")
+            loadData()
+        }
     }
     
     private func loadData() {

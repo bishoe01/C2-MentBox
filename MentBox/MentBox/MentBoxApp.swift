@@ -28,22 +28,38 @@ struct MentBoxApp: App {
     // Group 'v'에러 -> ViewBuilder로 조건부 뷰 보여주기
     @ViewBuilder
     private var rootContent: some View {
-        if let mentorView = navigationManager.mentorView {
-            MentorMainView()
-        } else if let learnerView = navigationManager.learnerView {
-            LearnerMainView()
-        } else {
-            switch navigationManager.rootView {
+        switch navigationManager.rootView {
+        case .auth(let authView):
+            switch authView {
             case .login:
                 SignInView()
             case .userTypeSelection:
-                UserTypeSelectionView(
-                    selectedUserType: .constant(nil)
-                )
+                UserTypeSelectionView(selectedUserType: .constant(nil))
             case .userInfoInput(let userType):
                 UserInfoInputView(userType: userType) {
                     navigationManager.setMainRoot(userType: userType)
                 }
+            }
+
+        case .mentor(let mentorView):
+            switch mentorView {
+            case .home:
+                MentorMainView()
+            case .myPage:
+                MentorProfileView()
+            }
+
+        case .learner(let learnerView):
+            switch learnerView {
+            case .home:
+                LearnerMainView()
+            case .chatRoom(let mentorId):
+//                ChatRoomView(mentorId: mentorId)
+                Text("Hi chatview")
+            case .myLetter:
+                MyLetterView()
+            case .myPage:
+                LearnerProfileView()
             }
         }
     }
@@ -51,8 +67,8 @@ struct MentBoxApp: App {
     var body: some Scene {
         WindowGroup {
             rootContent // 조건 분기는 모두 여기서 해결
-                .ignoresSafeArea()
                 .environmentObject(navigationManager)
+                .ignoresSafeArea()
         }
     }
 }
