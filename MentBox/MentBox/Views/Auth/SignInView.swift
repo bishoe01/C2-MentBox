@@ -122,9 +122,10 @@ struct SignInView: View {
                 // 먼저 Learner로 시도
                 if let _ = try await FirebaseService.shared.fetchLearner(userId: userId) {
                     await MainActor.run {
-                        currentUserType = .learner
-                        navigationManager.setMainRoot(userType: .learner)
+//                        currentUserType = .learner
                         isLoading = false
+                        UserDefaults.standard.set(false, forKey: "isLoggedOut")
+                        navigationManager.setMainRoot(userType: .learner)
                     }
                     return
                 }
@@ -133,16 +134,17 @@ struct SignInView: View {
                 let mentorDoc = try await Firestore.firestore().collection("mentors").document(userId).getDocument()
                 if mentorDoc.exists {
                     await MainActor.run {
-                        currentUserType = .mentor
-                        print("멘토 로그인 성공 - 화면 전환 시도")
+//                        currentUserType = .mentor
+                        isLoading = false
+                        UserDefaults.standard.set(false, forKey: "isLoggedOut")
                         navigationManager.setMainRoot(userType: .mentor)
                         print("멘토 화면 전환 완료: \(navigationManager.rootView)")
-                        isLoading = false
                     }
                 } else {
                     await MainActor.run {
                         isLoading = false
-                        showUserTypeSelection = true
+//                        showUserTypeSelection = true
+                        navigationManager.rootView = .auth(.userTypeSelection)
                     }
                 }
             } catch {
@@ -207,10 +209,12 @@ struct SignInView: View {
         }
     }
     
-    static func signOut() {
+    static func signOut(navigationManager: NavigationManager) {
         do {
             try Auth.auth().signOut()
             UserDefaults.standard.set(true, forKey: "isLoggedOut")
+            // 명시적으로 NavigationManager 초기화
+            navigationManager.setAuthRoot()
             print("로그아웃 성공")
         } catch {
             print("로그아웃 실패: \(error.localizedDescription)")

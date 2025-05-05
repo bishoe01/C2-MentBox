@@ -7,6 +7,7 @@ struct MentorProfileView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var showSignInView = false
+    @EnvironmentObject var navigationManager: NavigationManager
     
     var body: some View {
         ZStack {
@@ -67,7 +68,7 @@ struct MentorProfileView: View {
                         Button(action: {
                             do {
                                 try Auth.auth().signOut()
-                                showSignInView = true
+                                navigationManager.setAuthRoot()
                             } catch {
                                 alertMessage = "로그아웃에 실패했습니다."
                                 showAlert = true
@@ -93,9 +94,7 @@ struct MentorProfileView: View {
         } message: {
             Text(alertMessage)
         }
-        .fullScreenCover(isPresented: $showSignInView) {
-            SignInView()
-        }
+        
         .onAppear {
             loadUserData()
         }
