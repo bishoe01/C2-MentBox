@@ -6,7 +6,6 @@ struct MentorProfileView: View {
     @State private var mentor: Mentor?
     @State private var showAlert = false
     @State private var alertMessage = ""
-    @State private var showSignInView = false
     @EnvironmentObject var navigationManager: NavigationManager
     
     var body: some View {

@@ -7,7 +7,6 @@ struct LearnerProfileView: View {
     @State private var pendingQuestions: [(question: ChatBox, mentor: Mentor)] = []
     @State private var showAlert = false
     @State private var alertMessage = ""
-    @State private var showSignInView = false
     @State private var showDeleteAlert = false
     @State private var selectedQuestionId = ""
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
