@@ -27,20 +27,14 @@ enum LearnerView: Hashable {
     case myLetter
 }
 
+
+
 class NavigationManager: ObservableObject {
     @Published var path = NavigationPath()
     @Published var rootView: AppRootView = .auth(.login)
 
-    // 같은이름 navigate는 추후 수정이 필요할 듯 책임 명확히
-    func navigate(to destination: MentorView) {
-        path.append(destination)
-    }
-
-    func navigate(to destination: LearnerView) {
-        path.append(destination)
-    }
-
-    func navigate(to destination: AuthView) {
+    // 같은이름 navigate 3개를 하나로 합친 상태 
+    func navigate<T: Hashable>(to destination: T) {
         path.append(destination)
     }
 
