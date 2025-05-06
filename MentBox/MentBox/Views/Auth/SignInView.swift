@@ -135,8 +135,7 @@ struct SignInView: View {
                 } else {
                     await MainActor.run {
                         isLoading = false
-//                        showUserTypeSelection = true
-                        navigationManager.rootView = .auth(.userTypeSelection)
+                        navigationManager.navigate(to: AuthView.userTypeSelection)
                     }
                 }
             } catch {

@@ -43,7 +43,7 @@ struct UserTypeSelectionView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("닫기") {
-                        dismiss()
+                        navigationManager.setAuthRoot()
                     }
                 }
             }
