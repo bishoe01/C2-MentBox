@@ -55,27 +55,33 @@ struct UserInfoInputView: View {
                     }
                 }
                 
-                Section(header: Text("기본 정보")) {
+                Section(header: Text("기본 정보").menterFont(.body)) {
                     TextField("이름", text: $name)
                 }
                 
                 if userType == .learner {
-                    Section(header: Text("관심 분야")) {
-                        Picker("관심 분야", selection: $category) {
-                            ForEach(UserCategory.allCases) { category in
-                                Text(category.displayName).tag(category)
+                    Section(header: Text("관심 분야").menterFont(.body)) {
+                        HStack {
+                            Picker("", selection: $category) {
+                                ForEach(UserCategory.allCases) { category in
+                                    Text(category.displayName).tag(category)
+                                }
                             }
+                            .labelsHidden()
                         }
                     }
                 } else {
-                    Section(header: Text("전문 분야")) {
-                        Picker("전문 분야", selection: $expertise) {
-                            ForEach(UserCategory.allCases) { category in
-                                Text(category.displayName).tag(category)
+                    Section(header: Text("전문 분야").menterFont(.body)) {
+                        HStack {
+                            Picker("", selection: $expertise) {
+                                ForEach(UserCategory.allCases) { category in
+                                    Text(category.displayName).tag(category)
+                                }
                             }
+                            .labelsHidden()
                         }
                     }
-                    
+
                     Section(header: Text("자기 소개")) {
                         TextEditor(text: $bio)
                             .frame(height: 100)
