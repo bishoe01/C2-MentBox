@@ -75,4 +75,7 @@ GoogleService-Info.plist
 !*.xcodeproj/project.xcworkspace
 !*.xcodeproj/xcshareddata
 !*.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/xcuserdata
+!*.xcworkspace/xcuserdata
+!*.xcodeproj
 
