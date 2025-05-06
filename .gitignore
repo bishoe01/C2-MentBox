@@ -69,13 +69,11 @@ fastlane/test_output
 GoogleService-Info.plist
 
 # Xcode project files
-*.pbxproj
-*.xcodeproj/*
+!*.xcodeproj
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/project.xcworkspace
 !*.xcodeproj/xcshareddata
 !*.xcworkspace/contents.xcworkspacedata
 !*.xcodeproj/xcuserdata
 !*.xcworkspace/xcuserdata
-!*.xcodeproj
 
