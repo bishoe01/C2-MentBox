@@ -14,12 +14,8 @@ extension UserType: Identifiable {
 }
 
 struct SignInView: View {
-    @State private var isSignedIn = false
     @State private var errorMessage: String?
     @State private var isLoading = false
-    @State private var showUserTypeSelection = false
-    @State private var selectedUserType: UserType?
-    @State private var currentUserType: UserType?
     @EnvironmentObject var navigationManager: NavigationManager
     
     @AppStorage("isLoggedOut") private var isLoggedOut = false
@@ -48,7 +44,6 @@ struct SignInView: View {
                     Text("MentBox")
                         .menterFont(.logoHeader)
                 }
-                
                 Spacer()
                 
                 if isLoading {
@@ -95,14 +90,6 @@ struct SignInView: View {
         }
     }
     
-    private func handleUserTypeSelection(userType: UserType) {
-        currentUserType = userType
-        UserDefaults.standard.set(false, forKey: "isLoggedOut")
-        withAnimation {
-            showUserTypeSelection = false
-        }
-    }
-    
     // 이미 가입이 되어 있을 때
     private func checkUserType() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -114,7 +101,6 @@ struct SignInView: View {
                 // 먼저 Learner로 시도
                 if let _ = try await FirebaseService.shared.fetchLearner(userId: userId) {
                     await MainActor.run {
-//                        currentUserType = .learner
                         isLoading = false
                         UserDefaults.standard.set(false, forKey: "isLoggedOut")
                         navigationManager.setMainRoot(userType: .learner)
@@ -126,7 +112,6 @@ struct SignInView: View {
                 let mentorDoc = try await Firestore.firestore().collection("mentors").document(userId).getDocument()
                 if mentorDoc.exists {
                     await MainActor.run {
-//                        currentUserType = .mentor
                         isLoading = false
                         UserDefaults.standard.set(false, forKey: "isLoggedOut")
                         navigationManager.setMainRoot(userType: .mentor)
@@ -159,7 +144,7 @@ struct SignInView: View {
         }
 
         let firebaseCredential = OAuthProvider.credential(
-            withProviderID: "apple.com",
+            providerID: .apple,
             idToken: tokenString,
             rawNonce: ""
         )
@@ -185,7 +170,6 @@ struct SignInView: View {
                                 await MainActor.run {
                                     isLoading = false
                                     navigationManager.rootView = .auth(.userTypeSelection)
-                                    showUserTypeSelection = true
                                 }
                             }
                         } catch {
