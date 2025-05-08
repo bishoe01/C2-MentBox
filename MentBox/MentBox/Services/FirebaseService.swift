@@ -689,4 +689,54 @@ class FirebaseService {
             "answerId": answerId
         ])
     }
+
+
+    //MARK: - 회원 삭제 
+    func deleteLearner(userId: String) async throws {
+        
+        let bookmarksQuery = db.collection("bookmarks")
+            .whereField("userId", isEqualTo: userId)
+        let bookmarksSnapshot = try await bookmarksQuery.getDocuments()
+        for document in bookmarksSnapshot.documents {
+            try await document.reference.delete()
+        }
+        
+        
+        let questionsQuery = db.collection("questions")
+            .whereField("userId", isEqualTo: userId)
+        let questionsSnapshot = try await questionsQuery.getDocuments()
+        for document in questionsSnapshot.documents {
+            
+            let answersQuery = db.collection("answers")
+                .whereField("questionId", isEqualTo: document.documentID)
+            let answersSnapshot = try await answersQuery.getDocuments()
+            for answerDoc in answersSnapshot.documents {
+                try await answerDoc.reference.delete()
+            }
+            try await document.reference.delete()
+        }
+        
+        
+        try await db.collection("learners").document(userId).delete()
+    }
+    
+
+    func deleteMentor(mentorId: String) async throws {
+        
+        let answersQuery = db.collection("answers")
+            .whereField("userId", isEqualTo: mentorId)
+        let answersSnapshot = try await answersQuery.getDocuments()
+        
+        
+        for answerDoc in answersSnapshot.documents {
+            let questionId = answerDoc.data()["questionId"] as? String
+            if let questionId = questionId {
+                try await db.collection("questions").document(questionId).delete()
+            }
+            try await answerDoc.reference.delete()
+        }
+        
+
+        try await db.collection("mentors").document(mentorId).delete()
+    }
 }
