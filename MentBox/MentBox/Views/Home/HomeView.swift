@@ -5,7 +5,7 @@ struct HomeView: View {
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
     @State private var selectedMentor: Mentor? = nil
-
+    @State private var showMentorDetail = false
     var body: some View {
         ZStack {
             Image("BG")
@@ -71,22 +71,12 @@ struct HomeView: View {
                 updateBookmarkCount(for: questionId, action: action)
             }
         }
-        .background(
-            NavigationLink(
-                destination: Group {
-                    if let mentor = selectedMentor {
-                        MentorDetailView(mentor: mentor)
-                            .navigationBarHidden(true)
-                    }
-                },
-                isActive: Binding(
-                    get: { selectedMentor != nil },
-                    set: { if !$0 { selectedMentor = nil } }
-                )
-            ) {
-                EmptyView()
+        .navigationDestination(isPresented: $showMentorDetail) {
+            if let mentor = selectedMentor {
+                MentorDetailView(mentor: mentor)
+                    .navigationBarHidden(true)
             }
-        )
+        }
     }
 
     private func updateBookmarkCount(for questionId: String, action: String) {
