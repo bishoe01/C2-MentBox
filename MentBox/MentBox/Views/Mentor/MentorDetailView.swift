@@ -5,6 +5,7 @@ import SwiftUI
 struct MentorDetailView: View {
     let mentor: Mentor
     @Environment(\.presentationMode) private var presentationMode
+    @EnvironmentObject var navigationManager: NavigationManager
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var pendingQuestions: [(question: ChatBox, mentor: Mentor)] = []
     @State private var questionText: String = ""
@@ -13,6 +14,7 @@ struct MentorDetailView: View {
     @State private var alertMessage: String = ""
     @State private var showDeleteAlert = false
     @State private var selectedQuestionId: String = ""
+    @State private var isLoggedIn: Bool = false
     
     var body: some View {
         ZStack {
@@ -164,63 +166,92 @@ struct MentorDetailView: View {
                     Divider()
                         .background(Color.white.opacity(0.2))
                     
-                    HStack(spacing: 12) {
-                        ZStack(alignment: .center) {
-                            if questionText.isEmpty {
-                                Text("\(mentor.name) 멘토에게 편지를 작성해주세요")
-                                    .foregroundColor(.white.opacity(0.7))
-                                    .font(.system(size: 15))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 12)
+                    if isLoggedIn {
+                        HStack(spacing: 12) {
+                            ZStack(alignment: .center) {
+                                if questionText.isEmpty {
+                                    Text("\(mentor.name) 멘토에게 편지를 작성해주세요")
+                                        .foregroundColor(.white.opacity(0.7))
+                                        .font(.system(size: 15))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 12)
+                                }
+                                
+                                TextEditor(text: $questionText)
+                                    .frame(height: 40)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 8)
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(20)
+                                    .foregroundColor(.white)
+                                    .scrollContentBackground(.hidden)
+                                    .multilineTextAlignment(.leading)
                             }
                             
-                            TextEditor(text: $questionText)
-                                .frame(height: 40)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 8)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(20)
-                                .foregroundColor(.white)
-                                .scrollContentBackground(.hidden)
-                                .multilineTextAlignment(.leading)
-                        }
-                        
-                        Button(action: {
-                            checkPendingQuestion()
-                        }) {
-                            Image(systemName: "paperplane.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .frame(width: 40, height: 40)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [Color("btn_dark"), Color("btn_light")]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                            Button(action: {
+                                checkPendingQuestion()
+                            }) {
+                                Image(systemName: "paperplane.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                                    .frame(width: 40, height: 40)
+                                    .background(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color("btn_dark"), Color("btn_light")]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
                                     )
-                                )
-                                .clipShape(Circle())
+                                    .clipShape(Circle())
+                            }
+                            .disabled(questionText.isEmpty || isSubmitting)
+                            .opacity(questionText.isEmpty ? 0.5 : 1.0)
                         }
-                        .disabled(questionText.isEmpty || isSubmitting)
-                        .opacity(questionText.isEmpty ? 0.5 : 1.0)
+                        .padding(.horizontal)
+                        .padding(.vertical, 12)
+                    } else {
+                        Button(action: {
+                            alertMessage = "로그인이 필요한 서비스입니다."
+                            showAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "lock.fill")
+                                    .foregroundColor(.white.opacity(0.7))
+                                Text("로그인하고 편지 작성하기")
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .font(.system(size: 15))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                        }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
                 }
                 .background(Color.black.opacity(0.5))
             }
         }
         .navigationBarHidden(true)
         .onAppear {
+            checkLoginStatus()
             loadChatPairs()
         }
         .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("알림"),
-                message: Text(alertMessage),
-                dismissButton: .default(Text("확인"))
-            )
+            if !isLoggedIn {
+                Alert(
+                    title: Text("알림"),
+                    message: Text(alertMessage),
+                    primaryButton: .default(Text("로그인하기")) {
+                        navigationManager.setAuthRoot()
+                    },
+                    secondaryButton: .cancel(Text("취소"))
+                )
+            } else {
+                Alert(
+                    title: Text("알림"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("확인"))
+                )
+            }
         }
         .alert("질문 삭제", isPresented: $showDeleteAlert) {
             Button("취소", role: .cancel) {}
@@ -230,6 +261,10 @@ struct MentorDetailView: View {
         } message: {
             Text("이 질문을 삭제하시겠습니까?")
         }
+    }
+    
+    private func checkLoginStatus() {
+        isLoggedIn = Auth.auth().currentUser != nil
     }
     
     private func checkPendingQuestion() {
