@@ -28,6 +28,6 @@ struct LoginRequiredView: View {
             .padding(.top, 20)
             
             Spacer()
-        }
+        }.padding(.horizontal, 16)
     }
 }
