@@ -282,14 +282,6 @@ class FirebaseService {
     func addBookmark(questionId: String, userId: String) async throws {
         let db = Firestore.firestore()
         
-        let bookmarkData: [String: Any] = [
-            "questionId": questionId,
-            "userId": userId,
-            "createdAt": Date()
-        ]
-        
-        try await db.collection("bookmarks").addDocument(data: bookmarkData)
-        
         let userRef = db.collection("learners").document(userId)
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayUnion([questionId])
@@ -323,18 +315,6 @@ class FirebaseService {
     func removeBookmark(questionId: String, userId: String) async throws {
         let db = Firestore.firestore()
         
-        // 북마크 문서 삭제
-        let query = db.collection("bookmarks")
-            .whereField("questionId", isEqualTo: questionId)
-            .whereField("userId", isEqualTo: userId)
-        
-        let snapshot = try await query.getDocuments()
-        for document in snapshot.documents {
-            try await document.reference.delete()
-        }
-        
-        // MARK: bookmarkedQuestions 배열
-
         let userRef = db.collection("learners").document(userId)
         try await userRef.updateData([
             "bookmarkedQuestions": FieldValue.arrayRemove([questionId])
@@ -690,19 +670,11 @@ class FirebaseService {
         ])
     }
 
+    // MARK: - 회원 삭제
 
-    //MARK: - 회원 삭제 
     func deleteLearner(userId: String) async throws {
-        
-        let bookmarksQuery = db.collection("bookmarks")
-            .whereField("userId", isEqualTo: userId)
-        let bookmarksSnapshot = try await bookmarksQuery.getDocuments()
-        for document in bookmarksSnapshot.documents {
-            try await document.reference.delete()
-        }
-        
-        
-        let questionsQuery = db.collection("questions")
+        // 사용자의 질문들을 익명 처리
+        let questionsQuery = self.db.collection("questions")
             .whereField("userId", isEqualTo: userId)
         let questionsSnapshot = try await questionsQuery.getDocuments()
         for document in questionsSnapshot.documents {
@@ -712,25 +684,21 @@ class FirebaseService {
             ])
         }
         
-        
-        try await db.collection("learners").document(userId).delete()
+        try await self.db.collection("learners").document(userId).delete()
     }
     
-
     func deleteMentor(mentorId: String) async throws {
-        
-        let answersQuery = db.collection("answers")
+        let answersQuery = self.db.collection("answers")
             .whereField("userId", isEqualTo: mentorId)
         let answersSnapshot = try await answersQuery.getDocuments()
         
         for answerDoc in answersSnapshot.documents {
             try await answerDoc.reference.updateData([
                 "userId": "deleted_user",
-                "senderName": "탈퇴한 멘토"
+                "senderName": "탈퇴한 사용자"
             ])
         }
             
-    
-        try await db.collection("mentors").document(mentorId).delete()
+        try await self.db.collection("mentors").document(mentorId).delete()
     }
 }
