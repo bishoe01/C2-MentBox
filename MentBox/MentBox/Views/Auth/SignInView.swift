@@ -48,6 +48,25 @@ struct SignInView: View {
 //                        .padding()
                 }
                 
+                Button(action: {
+                    navigationManager.setMainRoot(userType: .learner)
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "eye.fill")
+                            .font(.system(size: 16))
+                        Text("로그인 없이 둘러보기")
+                            .font(.headline)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color.white.opacity(0.2))
+                    )
+                }
+                .padding(.horizontal, 40)
+
                 SignInWithAppleButton(
                     .signIn,
                     onRequest: { request in
