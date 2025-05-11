@@ -8,6 +8,7 @@ struct LearnerProfileView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var showDeleteAlert = false
+    @State private var showWithdrawalAlert = false
     @State private var selectedQuestionId = ""
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
@@ -165,6 +166,19 @@ struct LearnerProfileView: View {
                                     .cornerRadius(10)
                             }
                             .padding(.horizontal)
+                            
+                            Button(action: {
+                                showWithdrawalAlert = true
+                            }) {
+                                Text("회원탈퇴")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(.red.opacity(0.8))
+                                    .cornerRadius(10)
+                            }
+                            .padding(.horizontal)
                         }
                         .padding(.vertical)
                     }
@@ -185,6 +199,14 @@ struct LearnerProfileView: View {
             }
         } message: {
             Text("이 질문을 삭제하시겠습니까?")
+        }
+        .alert("회원탈퇴", isPresented: $showWithdrawalAlert) {
+            Button("취소", role: .cancel) {}
+            Button("탈퇴", role: .destructive) {
+                withdrawAccount()
+            }
+        } message: {
+            Text("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.")
         }
         .onAppear {
             loadUserData()
@@ -272,6 +294,31 @@ struct LearnerProfileView: View {
             } catch {
                 await MainActor.run {
                     alertMessage = "질문 삭제에 실패했습니다."
+                    showAlert = true
+                }
+            }
+        }
+    }
+
+    private func withdrawAccount() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            alertMessage = "로그인이 필요합니다."
+            showAlert = true
+            return
+        }
+
+        Task {
+            do {
+                try await Auth.auth().currentUser?.delete()
+                
+                try await FirebaseService.shared.deleteLearner(userId: userId)
+                
+                await MainActor.run {
+                    navigationManager.setAuthRoot()
+                }
+            } catch {
+                await MainActor.run {
+                    alertMessage = "회원탈퇴에 실패했습니다: \(error.localizedDescription)"
                     showAlert = true
                 }
             }
