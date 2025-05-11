@@ -13,6 +13,7 @@ struct LearnerProfileView: View {
     @State private var chatPairs: [(question: ChatBox, answer: ChatBox)] = []
     @State private var mentors: [Mentor] = []
     @State private var isLoading = true
+    @State private var isLoggedIn = false
     @EnvironmentObject var navigationManager: NavigationManager
 
     var body: some View {
@@ -21,7 +22,9 @@ struct LearnerProfileView: View {
                 .resizable()
                 .edgesIgnoringSafeArea(.all)
 
-            if isLoading {
+            if !isLoggedIn {
+                LoginRequiredView()
+            } else if isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.5)
@@ -166,7 +169,7 @@ struct LearnerProfileView: View {
                                     .cornerRadius(10)
                             }
                             .padding(.horizontal)
-                            
+
                             Button(action: {
                                 showWithdrawalAlert = true
                             }) {
@@ -209,20 +212,28 @@ struct LearnerProfileView: View {
             Text("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.")
         }
         .onAppear {
-            loadUserData()
-            loadBookmarkedData()
+            checkLoginStatus()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("BookmarkChanged"))) { _ in
+            if isLoggedIn {
+                loadBookmarkedData()
+            }
+        }
+    }
+
+    private func checkLoginStatus() {
+        if let _ = Auth.auth().currentUser {
+            isLoggedIn = true
+            loadUserData()
             loadBookmarkedData()
+        } else {
+            isLoggedIn = false
+            isLoading = false
         }
     }
 
     private func loadUserData() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            alertMessage = "로그인이 필요합니다."
-            showAlert = true
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
         Task {
             do {
@@ -243,13 +254,7 @@ struct LearnerProfileView: View {
     }
 
     private func loadBookmarkedData() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("로그인된 정보가 없습니다")
-            Task { @MainActor in
-                isLoading = false
-            }
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
         let group = DispatchGroup()
 
@@ -277,11 +282,7 @@ struct LearnerProfileView: View {
     }
 
     private func deleteQuestion() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            alertMessage = "로그인이 필요합니다."
-            showAlert = true
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
         Task {
             do {
@@ -301,18 +302,13 @@ struct LearnerProfileView: View {
     }
 
     private func withdrawAccount() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            alertMessage = "로그인이 필요합니다."
-            showAlert = true
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
         Task {
             do {
                 try await Auth.auth().currentUser?.delete()
-                
                 try await FirebaseService.shared.deleteLearner(userId: userId)
-                
+
                 await MainActor.run {
                     navigationManager.setAuthRoot()
                 }

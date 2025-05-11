@@ -7,6 +7,7 @@ struct MentorProfileView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var showWithdrawalAlert = false
+    @State private var isLoggedIn = false
     @EnvironmentObject var navigationManager: NavigationManager
     
     var body: some View {
@@ -14,9 +15,12 @@ struct MentorProfileView: View {
             Image("BG")
                 .resizable()
                 .ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 20) {
-                    VStack(spacing: 5) {
+            
+            if !isLoggedIn {
+                LoginRequiredView()
+            } else {
+                ScrollView {
+                    VStack(spacing: 20) {
                         VStack(spacing: 5) {
                             MentBoxHeader(title: "MENTBOX", isPadding: false)
 
@@ -117,16 +121,21 @@ struct MentorProfileView: View {
             Text("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.")
         }
         .onAppear {
+            checkLoginStatus()
+        }
+    }
+    
+    private func checkLoginStatus() {
+        if let _ = Auth.auth().currentUser {
+            isLoggedIn = true
             loadUserData()
+        } else {
+            isLoggedIn = false
         }
     }
     
     private func loadUserData() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            alertMessage = "로그인이 필요합니다."
-            showAlert = true
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         
         Task {
             do {
@@ -151,18 +160,11 @@ struct MentorProfileView: View {
     }
     
     private func withdrawAccount() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            alertMessage = "로그인이 필요합니다."
-            showAlert = true
-            return
-        }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
         Task {
             do {
-                
                 try await Auth.auth().currentUser?.delete()
-                
-                
                 try await FirebaseService.shared.deleteMentor(mentorId: userId)
                 
                 await MainActor.run {
