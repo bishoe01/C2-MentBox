@@ -706,14 +706,10 @@ class FirebaseService {
             .whereField("userId", isEqualTo: userId)
         let questionsSnapshot = try await questionsQuery.getDocuments()
         for document in questionsSnapshot.documents {
-            
-            let answersQuery = db.collection("answers")
-                .whereField("questionId", isEqualTo: document.documentID)
-            let answersSnapshot = try await answersQuery.getDocuments()
-            for answerDoc in answersSnapshot.documents {
-                try await answerDoc.reference.delete()
-            }
-            try await document.reference.delete()
+            try await document.reference.updateData([
+                "userId": "deleted_user",
+                "senderName": "탈퇴한 사용자"
+            ])
         }
         
         
@@ -727,16 +723,14 @@ class FirebaseService {
             .whereField("userId", isEqualTo: mentorId)
         let answersSnapshot = try await answersQuery.getDocuments()
         
-        
         for answerDoc in answersSnapshot.documents {
-            let questionId = answerDoc.data()["questionId"] as? String
-            if let questionId = questionId {
-                try await db.collection("questions").document(questionId).delete()
-            }
-            try await answerDoc.reference.delete()
+            try await answerDoc.reference.updateData([
+                "userId": "deleted_user",
+                "senderName": "탈퇴한 멘토"
+            ])
         }
-        
-
+            
+    
         try await db.collection("mentors").document(mentorId).delete()
     }
 }
