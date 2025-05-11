@@ -10,6 +10,7 @@
 		2302722D2DB506AB00E2663C /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2302722C2DB506AB00E2663C /* FirebaseCore */; };
 		235F32D92DAAB23800373363 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32D82DAAB23800373363 /* PretendardVariable.ttf */; };
 		235F32DB2DAAB2B400373363 /* Geologica_Auto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */; };
+		23C6CAD22DD0882A00201BB2 /* LoginRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C6CAD12DD0882A00201BB2 /* LoginRequiredView.swift */; };
 		23D2A7922DC5CF9E0098AFDB /* UserTypeSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D2A7912DC5CF9E0098AFDB /* UserTypeSelectView.swift */; };
 		23D3ADB52DB6323000B79A36 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 23D3ADB42DB6323000B79A36 /* FirebaseMessaging */; };
 		23F5A3C42DA3FC4B000149D6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 23F5A3C32DA3FC4B000149D6 /* FirebaseAuth */; };
@@ -19,6 +20,7 @@
 /* Begin PBXFileReference section */
 		235F32D82DAAB23800373363 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
 		235F32DA2DAAB2B400373363 /* Geologica_Auto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Geologica_Auto-Bold.ttf"; sourceTree = "<group>"; };
+		23C6CAD12DD0882A00201BB2 /* LoginRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginRequiredView.swift; sourceTree = "<group>"; };
 		23D2A7912DC5CF9E0098AFDB /* UserTypeSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTypeSelectView.swift; sourceTree = "<group>"; };
 		23F5A3AF2DA3F906000149D6 /* MentBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MentBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -89,6 +91,7 @@
 				2302722B2DB506AB00E2663C /* Frameworks */,
 				23F5A3B02DA3F906000149D6 /* Products */,
 				23D2A7912DC5CF9E0098AFDB /* UserTypeSelectView.swift */,
+				23C6CAD12DD0882A00201BB2 /* LoginRequiredView.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -184,6 +187,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				23C6CAD22DD0882A00201BB2 /* LoginRequiredView.swift in Sources */,
 				23D2A7922DC5CF9E0098AFDB /* UserTypeSelectView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

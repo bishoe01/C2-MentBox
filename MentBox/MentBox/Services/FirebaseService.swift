@@ -498,7 +498,7 @@ class FirebaseService {
     
     // 멘토 생성
     func createMentor(mentor: Mentor) async throws {
-        print("🔍 멘토 데이터 저장 시작: \(mentor.name)")
+        print("멘토 데이터 저장 시작: \(mentor.name)")
         let mentorData: [String: Any] = [
             "id": mentor.id,
             "name": mentor.name,

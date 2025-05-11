@@ -7,9 +7,6 @@ import SwiftUI
 enum UserType {
     case learner
     case mentor
-}
-
-extension UserType: Identifiable {
     var id: Int { hashValue }
 }
 
